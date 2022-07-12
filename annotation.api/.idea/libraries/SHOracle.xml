@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SHOracle">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../UZH-ASE-AnnotationWS-FormalModel/build/libs/SHOracle.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
