@@ -1,4 +1,4 @@
-name: Publish Docker image
+name: Build and Publish REST API Image to Docker Hub
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   push_to_registries:
-    name: Push Docker image to Docker Hub
+    name: Push REST API to Docker Hub
     runs-on: ubuntu-latest
     permissions:
       packages: write
