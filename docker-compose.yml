@@ -12,13 +12,11 @@ services:
   mongodb:
     container_name: syntax-highlighting-service-mongodb
     image: mongo:latest
-    restart: always
+    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-      DB_NAME: $DB_NAME
-      DB_USER: $DB_USER
-      DB_PASSWORD: $DB_PASSWORD
+      MONGO_INITDB_DATABASE: annotations
     ports:
       - 27017:27017
     volumes:
