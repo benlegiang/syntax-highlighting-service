@@ -2,7 +2,10 @@ name: Build and Publish REST API Image to Docker Hub
 
 on:
   push:
-    branches: master
+    branches:
+      - master
+    paths:
+      - rest.api/**
 
 jobs:
   push_to_registries:
