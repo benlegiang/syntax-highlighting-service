@@ -3,7 +3,7 @@ version: '3.8'
 # REST API SERVICES
 services:
   prod:
-    container_name: syntax-highlighting-service-rest.api
+    container_name: syntax-highlighting-service-rest-api
     build: .
     ports: 
       - 8080:8080
