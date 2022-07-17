@@ -8,3 +8,25 @@ services:
     environment:
       PORT: 8080
     restart: always
+
+  mongodb:
+    container_name: syntax-highlighting-service-mongodb
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      DB_NAME: $DB_NAME
+      DB_USER: $DB_USER
+      DB_PASSWORD: $DB_PASSWORD
+    ports:
+      - 27017:27017
+    volumes:
+      - db-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+volumes:
+  db-data:
+    
+
+
