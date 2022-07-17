@@ -36,5 +36,5 @@ jobs:
           context: rest.api/
           file: rest.api/Dockerfile
           push: true
-          tags: latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
