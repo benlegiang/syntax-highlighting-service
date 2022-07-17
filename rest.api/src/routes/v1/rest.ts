@@ -14,7 +14,7 @@ export class Rest {
   private mountRoutes(): void {
     // Entry endpoint for micro services
     this.router.post("/highlight", (req, res) => {
-      res.json({ message: "Highlighting service in progress" });
+      res.json({ message: "Successful!" });
     });
   }
 }
