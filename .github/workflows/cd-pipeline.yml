@@ -1,0 +1,21 @@
+name: Continuous Deployment on Remote Ubuntu VM
+on:
+  push:
+    branches: master
+    
+jobs: 
+  deploy:
+    name: Deploy to VM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create SSH Connection to VM
+      uses: appleboy/ssh-action@master
+      with:
+        host: benlegiang.ch
+        username: ${{secrets.UBUNTU_VM_USER}}
+        key: ${{secrets.UBUNTU_VM_SECRET}}
+        port: 22
+        script: |
+          cd syntax-highlighting-service
+          git pull origin master
+          bash deploy.sh
