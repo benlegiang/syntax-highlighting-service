@@ -4,7 +4,7 @@ services:
   rest-api:
     container_name: syntax-highlighting-service-rest-api
     build: ./rest.api
-    image: syntax-highlighting-service-rest-api:master
+    image: benlegiang/syntax-highlighting-service-rest-api:master
     ports:
       - 8080:8080
     restart: always
