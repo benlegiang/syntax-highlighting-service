@@ -16,6 +16,7 @@ jobs:
         key: ${{secrets.UBUNTU_VM_SECRET}}
         port: 22
         script: |
+          docker login --username benlegiang --password-stdin < ~/docker_pwd
           cd syntax-highlighting-service
           git pull origin master
           docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
