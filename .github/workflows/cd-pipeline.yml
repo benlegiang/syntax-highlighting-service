@@ -1,7 +1,7 @@
 name: Continuous Deployment on Remote Ubuntu VM
 on:
   push:
-    branches: master
+    branches: [master]
     
 jobs: 
   deploy:
