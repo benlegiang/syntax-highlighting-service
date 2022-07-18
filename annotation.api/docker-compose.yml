@@ -1,0 +1,16 @@
+version: '3.8'
+
+# ANNOTATION API SERVICES
+services:
+  prod:
+    container_name: syntax-highlighting-service-annotation-api
+    build: .
+    ports: 
+      - 8080:8080
+    environment:
+      PORT: 8080
+      
+
+
+
+
