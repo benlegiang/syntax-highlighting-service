@@ -1,6 +1,6 @@
-package ch.benlegiang.annotation;
+package ch.benlegiang.annotation.api;
 
-import ch.benlegiang.annotation.enums.CodeLanguage;
+import ch.benlegiang.annotation.api.enums.CodeLanguage;
 import lexer.*;
 import resolver.*;
 

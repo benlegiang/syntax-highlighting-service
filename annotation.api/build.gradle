@@ -1,20 +1,24 @@
 plugins {
-    id 'java'
+	id 'org.springframework.boot' version '2.7.1'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
 }
 
-group 'ch.benlegiang'
-version '1.0-SNAPSHOT'
+group = 'ch.benlegiang'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '18'
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
-    implementation(files("libs/SHOracle.jar"))
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+	implementation(files("libs/SHOracle.jar"))
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-test {
-    useJUnitPlatform()
+tasks.named('test') {
+	useJUnitPlatform()
 }

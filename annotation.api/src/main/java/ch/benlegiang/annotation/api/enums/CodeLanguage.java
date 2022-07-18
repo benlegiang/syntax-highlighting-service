@@ -1,4 +1,4 @@
-package ch.benlegiang.annotation.enums;
+package ch.benlegiang.annotation.api.enums;
 
 public enum CodeLanguage {
     JAVA,
