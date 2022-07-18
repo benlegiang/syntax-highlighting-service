@@ -17,7 +17,7 @@ class App {
       res.json({ message: "syntax highlighting api" });
     });
     this.express.use("/", router);
-    this.express.use("api/v1", new Rest().getRouter());
+    this.express.use("/api/v1", new Rest().getRouter());
   }
 }
 
