@@ -16,7 +16,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-      MONGO_INITDB_DATABASE: annotations
+      MONGO_INITDB_DATABASE: syntaxhighlighting
     ports:
       - 27017:27017
     volumes:
