@@ -16,7 +16,7 @@ jobs:
         key: ${{secrets.UBUNTU_VM_SECRET}}
         port: 22
         script: |
-          docker login --username benlegiang --password-stdin < docker_pwd
+          docker login --username benlegiang --password-stdin < docker_pwd.txt
           cd syntax-highlighting-service
           git pull origin master
           bash deploy.sh
