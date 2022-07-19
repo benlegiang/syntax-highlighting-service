@@ -6,9 +6,9 @@ services:
     container_name: syntax-highlighting-service-rest-api
     build: .
     ports: 
-      - 8081:8081
+      - "${REST_API_PORT}:${REST_API_PORT}" 
     environment:
-      PORT: 8081
+      PORT: "${REST_API_PORT}"
       
 
 

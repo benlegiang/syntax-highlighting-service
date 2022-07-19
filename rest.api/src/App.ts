@@ -1,5 +1,5 @@
 import express from "express";
-import { Rest } from "./routes/v1/rest";
+import { RestController } from "./v1/controllers/RestController";
 
 class App {
   public express: express.Express;
@@ -17,7 +17,7 @@ class App {
       res.json({ message: "syntax highlighting api" });
     });
     this.express.use("/", router);
-    this.express.use("/api/v1", new Rest().getRouter());
+    this.express.use("/api/v1", new RestController().getRouter());
   }
 }
 

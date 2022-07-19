@@ -1,6 +1,7 @@
 import express from "express";
+import { HighlightingApp } from "../HighlightingApp";
 
-export class Rest {
+export class RestController {
   private router: any;
   constructor() {
     this.router = express.Router();
@@ -14,7 +15,11 @@ export class Rest {
   private mountRoutes(): void {
     // Entry endpoint for micro services
     this.router.post("/highlight", (req, res) => {
-      res.json({ message: "Entry endpoint for all micro services" });
+      new HighlightingApp().start(req).then((result) => {
+        res.json(result);
+      });
     });
+
+    // Add additional endpoints here if needed
   }
 }
