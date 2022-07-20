@@ -25,6 +25,8 @@ services:
     container_name: syntax-highlighting-service-annotation-api
     build: ./annotation.api
     image: benlegiang/syntax-highlighting-service-annotation-api:master
+    ports:
+      - 8080:8080
     restart: always
 
 volumes:
