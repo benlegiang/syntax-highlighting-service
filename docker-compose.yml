@@ -1,18 +1,9 @@
 version: '3.8'
 
 services:
-  rest-api:
-    container_name: syntax-highlighting-service-rest-api
-    build: ./rest.api
-    image: benlegiang/syntax-highlighting-service-rest-api:master
-    ports:
-      - 8081:8081
-    restart: always
-
   mongodb:
     container_name: syntax-highlighting-service-mongodb
     image: mongo:latest
-    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
@@ -22,6 +13,19 @@ services:
     volumes:
       - db-data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    restart: unless-stopped
+  rest-api:
+    container_name: syntax-highlighting-service-rest-api
+    build: ./rest.api
+    image: benlegiang/syntax-highlighting-service-rest-api:master
+    ports:
+      - 8081:8081
+    restart: always
+  annotation-api:
+    container_name: syntax-highlighting-service-annotation-api
+    build: ./annotation.api
+    image: benlegiang/syntax-highlighting-service-annotation-api:master
+    restart: always
 
 volumes:
   db-data:

@@ -18,7 +18,7 @@ def predict(model):
 
 def fine_tune(model):
 
-    # [tokenIds], [hCodes]
+    # [tokenIds from LToks], [hCodes]
     # IMPORTANT: Both must be of the same length
     model.setup_for_finetuning()
     model.finetune_on([1, 25, 30, 44, 55], [0, 0, 4, 0, 3])
