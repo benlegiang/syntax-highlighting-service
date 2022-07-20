@@ -1,12 +1,10 @@
 package ch.benlegiang.annotation.api.utils;
 
-import ch.benlegiang.annotation.api.dtos.AnnotationPostDTO;
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
 import ch.benlegiang.annotation.api.entities.JavaAnnotationEntity;
 import ch.benlegiang.annotation.api.entities.KotlinAnnotationEntity;
 import ch.benlegiang.annotation.api.entities.PythonAnnotationEntity;
 import ch.benlegiang.annotation.api.enums.CodeLanguage;
-import ch.benlegiang.annotation.api.mappers.AnnotationMapper;
 import lexer.HTok;
 import lexer.LTok;
 import resolver.JavaResolver;
@@ -51,19 +49,19 @@ public class AnnotationUtil {
         }
     }
 
-    public static AnnotationEntity getAnnotationEntityByPostDTO(AnnotationPostDTO annotationPostDTO) {
+    public static AnnotationEntity getAnnotationEntityByLang(CodeLanguage lang) {
 
         AnnotationEntity annotationEntity;
 
-        switch (CodeLanguage.valueOf(annotationPostDTO.getCodeLanguage())) {
+        switch (lang) {
             case JAVA:
-                annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToJavaEntity(annotationPostDTO);
+                annotationEntity = new JavaAnnotationEntity();
                 return annotationEntity;
             case PYTHON3:
-                annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToPythonEntity(annotationPostDTO);
+                annotationEntity = new PythonAnnotationEntity();
                 return annotationEntity;
             case KOTLIN:
-                annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToKotlinEntity(annotationPostDTO);
+                annotationEntity = new KotlinAnnotationEntity();
                 return annotationEntity;
             default:
                 throw new IllegalArgumentException("Please provide a code language!");
