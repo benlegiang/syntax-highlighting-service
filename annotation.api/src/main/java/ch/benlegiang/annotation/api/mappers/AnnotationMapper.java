@@ -1,18 +1,25 @@
 package ch.benlegiang.annotation.api.mappers;
 
 import ch.benlegiang.annotation.api.dtos.AnnotationPostDTO;
-import ch.benlegiang.annotation.api.entities.AnnotationEntity;
+import ch.benlegiang.annotation.api.entities.JavaAnnotationEntity;
+import ch.benlegiang.annotation.api.entities.PythonAnnotationEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper()
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AnnotationMapper {
 
     AnnotationMapper INSTANCE = Mappers.getMapper(AnnotationMapper.class);
 
-    @Mapping(source = "codeLanguage", target = "codeLanguage")
     @Mapping(source = "sourceCode", target = "sourceCode")
-    AnnotationEntity convertAnnotationPostDTOToEntity(AnnotationPostDTO annotationPostDTO);
+    PythonAnnotationEntity convertAnnotationPostDTOToPythonEntity(AnnotationPostDTO annotationPostDTO);
 
+    @Mapping(source = "sourceCode", target = "sourceCode")
+    JavaAnnotationEntity convertAnnotationPostDTOToJavaEntity(AnnotationPostDTO annotationPostDTO);
+
+
+    @Mapping(source = "sourceCode", target = "sourceCode")
+    JavaAnnotationEntity convertAnnotationPostDTOToKotlinEntity(AnnotationPostDTO annotationPostDTO);
 }

@@ -1,20 +1,16 @@
 package ch.benlegiang.annotation.api.entities;
 
-import ch.benlegiang.annotation.api.enums.CodeLanguage;
 import lexer.LTok;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-
-import java.util.List;
-
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-// @Document
+@Document(collection = "annotations")
 public class AnnotationEntity {
     @Id
     private String id;
-    private CodeLanguage codeLanguage;
     private String sourceCode;
-    private List<LTok> lexTokens;
-
+    private LTok[] lexTokens;
+    private String[] hCodes;
 }

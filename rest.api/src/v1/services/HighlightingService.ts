@@ -3,32 +3,35 @@ import { environment } from "../../environments/environment-prod";
 
 const url = `http://${environment.annotationApi.host}:${environment.annotationApi.port}/api/v1/annotate`;
 
-enum CodeLanguage {
-  PYTHON3,
-  JAVA,
-  KOTLIN,
+interface HighlightingResult {
+  codeLanguage: String;
+  sourceCode: String;
+  hCodes: number[];
 }
 
 export class HighlightingService {
-  public async highlight(codeLanguage: CodeLanguage, sourceCode: String): Promise<any> {
-    let result = null;
-    const payload = {
-      codeLanguage: codeLanguage,
+  public async highlight(codeLanguage: String, sourceCode: String): Promise<HighlightingResult> {
+    const requestBody = JSON.stringify({
+      codeLanguage: codeLanguage.toUpperCase(),
       sourceCode: sourceCode,
-    };
-    await axios
-      .post(url, {
-        payload,
-      })
-      .then((res) => {
-        result = res.data;
+    });
+
+    try {
+      const response: any = await axios.post(url, requestBody, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-    return Promise.resolve({
-      codeLanguage: "",
-      sourceCode: "",
-      lToks: "",
-      hToks: "",
-    });
+      const responseBody: HighlightingResult = response?.data;
+
+      return Promise.resolve(responseBody);
+    } catch (err) {
+      console.log(err.code);
+      return Promise.resolve(null);
+    }
   }
 }
+
+// POST REQUEST VIA COMMAND LINE
+// curl -d '{"codeLanguage":"java", "sourceCode":" public String annotate(@RequestBody AnnotationPostDTO annotationPostDto) {}"}' -H "Content-Type: application/json" -X POST http://localhost:8081/api/v1/highlight
