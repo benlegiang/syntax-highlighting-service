@@ -9,8 +9,8 @@ def start():
     print(res2)
 
 def predict(model):
+    # tokenIds from LToks for prediction
     model.setup_for_prediction()
-    # lToks
     p = model.predict([1, 25, 30, 44, 55])
     pa = model.predict([55, 44, 30, 25])
 
