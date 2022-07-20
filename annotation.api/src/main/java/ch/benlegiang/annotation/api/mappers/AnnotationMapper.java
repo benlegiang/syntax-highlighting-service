@@ -1,7 +1,10 @@
 package ch.benlegiang.annotation.api.mappers;
 
+import ch.benlegiang.annotation.api.dtos.AnnotationGetDTO;
 import ch.benlegiang.annotation.api.dtos.AnnotationPostDTO;
+import ch.benlegiang.annotation.api.entities.AnnotationEntity;
 import ch.benlegiang.annotation.api.entities.JavaAnnotationEntity;
+import ch.benlegiang.annotation.api.entities.KotlinAnnotationEntity;
 import ch.benlegiang.annotation.api.entities.PythonAnnotationEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,5 +24,11 @@ public interface AnnotationMapper {
 
 
     @Mapping(source = "sourceCode", target = "sourceCode")
-    JavaAnnotationEntity convertAnnotationPostDTOToKotlinEntity(AnnotationPostDTO annotationPostDTO);
+    KotlinAnnotationEntity convertAnnotationPostDTOToKotlinEntity(AnnotationPostDTO annotationPostDTO);
+
+    @Mapping(target = "codeLanguage")
+    @Mapping(target = "sourceCode")
+    @Mapping(target = "HCodeValues")
+    AnnotationGetDTO convertAnnotationEntityToGetDTO(AnnotationEntity annotationEntity);
+
 }

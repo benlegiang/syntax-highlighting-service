@@ -1,11 +1,17 @@
 package ch.benlegiang.annotation.api.controllers;
 
+import ch.benlegiang.annotation.api.dtos.AnnotationGetDTO;
 import ch.benlegiang.annotation.api.dtos.AnnotationPostDTO;
-import ch.benlegiang.annotation.api.enums.CodeLanguage;
+import ch.benlegiang.annotation.api.entities.AnnotationEntity;
+import ch.benlegiang.annotation.api.mappers.AnnotationMapper;
 import ch.benlegiang.annotation.api.services.AnnotationService;
+import ch.benlegiang.annotation.api.utils.AnnotationUtil;
+import lexer.HTok;
 import lexer.LTok;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1")
@@ -17,24 +23,23 @@ public class AnnotationController {
         this.annotationService = annotationService;
     }
 
+    // For now, this endpoint returns the hCodeValues from the AST
+    // hCodeValues from AST is stored on DB for fine-tuning
+    // TODO: Needs to return the hCodeValues from the SHModel
     @PostMapping(path = "/annotate")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String annotate(@RequestBody AnnotationPostDTO annotationPostDto) {
+    public AnnotationGetDTO annotate(@RequestBody AnnotationPostDTO annotationPostDto) {
+        AnnotationEntity annotationEntity = AnnotationUtil.getAnnotationEntityByPostDTO(annotationPostDto);
 
+        List<Integer> tokenIds = annotationService.lexSourceCode(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
+        List<Integer> hCodeValues = annotationService.highlightSourceCode(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
+        annotationEntity.setTokenIds(tokenIds);
+        annotationEntity.setHCodeValues(hCodeValues);
 
-        CodeLanguage codeLanguage = CodeLanguage.valueOf(annotationPostDto.getCodeLanguage());
+        annotationService.addAnnotationEntityToDatabase(annotationEntity);
 
-        System.out.println(codeLanguage);
-
-        /*PythonAnnotationEntity pythonAnnotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToEntity(annotationPostDto);
-
-        LTok[] lToks = annotationService.lexSourceCode(CodeLanguage.JAVA, pythonAnnotationEntity.getSourceCode());
-        pythonAnnotationEntity.setLexTokens(lToks);
-
-        System.out.println(pythonAnnotationEntity);*/
-
-        return "";
-
+        AnnotationGetDTO annotationGetDTO = AnnotationMapper.INSTANCE.convertAnnotationEntityToGetDTO(annotationEntity);
+        return annotationGetDTO;
     }
 }
