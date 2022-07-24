@@ -26,7 +26,8 @@ services:
     build: ./annotation.api
     image: benlegiang/syntax-highlighting-service-annotation-api:master
     ports:
-      - $ANNOTATION_API_HOST_PORT:8080
+      # - $ANNOTATION_API_HOST_PORT:8080
+      - 8080:8080
     depends_on:
       - mongodb
     restart: always
