@@ -20,6 +20,8 @@ services:
     image: benlegiang/syntax-highlighting-service-rest-api:master
     ports:
       - 8081:8081
+    depends_on:
+      - annotation-api
     restart: always
   annotation-api:
     container_name: syntax-highlighting-service-annotation-api
