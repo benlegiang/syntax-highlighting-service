@@ -11,6 +11,8 @@ services:
     volumes:
       - db-data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - backend
     restart: unless-stopped
   rest-api:
     container_name: syntax-highlighting-service-rest-api
@@ -20,6 +22,8 @@ services:
       - 8081:8081
     depends_on:
       - annotation-api
+    networks:
+      - backend    
     restart: always
   annotation-api:
     container_name: syntax-highlighting-service-annotation-api
@@ -28,8 +32,13 @@ services:
     depends_on:
       - mongodb
     restart: always
+    networks:
+      - backend
 volumes:
   db-data:
+networks:
+  backend:
+    driver: bridge
     
 
 

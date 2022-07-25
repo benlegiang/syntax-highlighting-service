@@ -16,12 +16,16 @@ export class HighlightingService {
       sourceCode: sourceCode,
     });
 
+    console.log(url);
+
     try {
       const response: any = await axios.post(url, requestBody, {
         headers: {
           "Content-Type": "application/json",
         },
       });
+
+      console.log(response);
 
       const responseBody: HighlightingResult = response?.data;
 
