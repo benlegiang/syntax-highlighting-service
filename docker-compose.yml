@@ -8,8 +8,6 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=$MONGO_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD=$MONGO_ROOT_PASSWORD
       - MONGO_INITDB_DATABASE=$MONGO_DB
-    ports:
-      - $MONGO_HOST_PORT:27017
     volumes:
       - db-data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
@@ -27,9 +25,6 @@ services:
     container_name: syntax-highlighting-service-annotation-api
     build: ./annotation.api
     image: benlegiang/syntax-highlighting-service-annotation-api:master
-    ports:
-      # - $ANNOTATION_API_HOST_PORT:8080
-      - 8080:8080
     depends_on:
       - mongodb
     restart: always
