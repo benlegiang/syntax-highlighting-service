@@ -24,7 +24,7 @@ services:
     build: ./prediction.api
     image: benlegiang/syntax-highlighting-service-prediction-api:master
     ports:
-      - 8082:8082
+      - $PREDICTION_API_HOST_PORT:5555
     deploy:
       resources:
         limits:
@@ -37,7 +37,7 @@ services:
     build: ./rest.api
     image: benlegiang/syntax-highlighting-service-rest-api:master
     ports:
-      - 8081:8081
+      - $REST_API_HOST_PORT:8081
     depends_on:
       - annotation-api
     deploy:

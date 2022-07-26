@@ -1,5 +1,5 @@
 # BUILD 
-FROM gradle:7.5.0-jdk18-alpine AS build
+FROM gradle:7.5.0-jdk18 AS build
 ENV APP_HOME=/usr/app/
 WORKDIR $APP_HOME
 COPY build.gradle settings.gradle $APP_HOME
@@ -14,7 +14,7 @@ COPY . .
 RUN gradle clean build
 
 # CONTAINER
-FROM openjdk:18-alpine
+FROM openjdk:18.0
 ENV ARTIFACT_NAME=annotation.api-0.0.1-SNAPSHOT.jar
 ENV APP_HOME=/usr/app/
 
