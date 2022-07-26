@@ -1,7 +1,5 @@
+import { environment } from "./../../environments/environment-prod";
 import axios from "axios";
-import { environment } from "../../environments/environment-prod";
-
-const url = `http://${environment.annotationApi.host}:${environment.annotationApi.port}/api/v1/annotate`;
 
 interface HighlightingResult {
   codeLanguage: String;
@@ -16,16 +14,12 @@ export class HighlightingService {
       sourceCode: sourceCode,
     });
 
-    console.log(url);
-
     try {
-      const response: any = await axios.post(url, requestBody, {
+      const response: any = await axios.post(environment.annotationApi.url, requestBody, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-
-      console.log(response);
 
       const responseBody: HighlightingResult = response?.data;
 

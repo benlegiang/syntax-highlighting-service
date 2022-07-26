@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mongodb:
-    container_name: syntax-highlighting-service-mongodb
+    container_name: syntax-highlighting-service-mongodb`
     image: mongo:latest
     environment:
       - MONGO_INITDB_ROOT_USERNAME=$MONGO_ROOT_USERNAME
@@ -11,9 +11,25 @@ services:
     volumes:
       - db-data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
     networks:
       - backend
     restart: unless-stopped
+  prediction-api:
+    container_name: syntax-highlighting-service-prediction-api
+    build: ./prediction.api
+    image: benlegiang/syntax-highlighting-service-prediction-api:master
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    networks:
+      - backend 
   rest-api:
     container_name: syntax-highlighting-service-rest-api
     build: ./rest.api
@@ -22,6 +38,11 @@ services:
       - 8081:8081
     depends_on:
       - annotation-api
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
     networks:
       - backend    
     restart: always
@@ -31,6 +52,11 @@ services:
     image: benlegiang/syntax-highlighting-service-annotation-api:master
     depends_on:
       - mongodb
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1536M
     restart: always
     networks:
       - backend
