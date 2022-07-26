@@ -8,5 +8,5 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["gunicorn", "--bind", "localhost:8082", "app.main:app"]
+CMD ["gunicorn", "app.main:app"]
 

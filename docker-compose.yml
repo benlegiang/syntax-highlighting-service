@@ -23,6 +23,8 @@ services:
     container_name: syntax-highlighting-service-prediction-api
     build: ./prediction.api
     image: benlegiang/syntax-highlighting-service-prediction-api:master
+    ports:
+      - 8082:8082
     deploy:
       resources:
         limits:
