@@ -1,13 +1,11 @@
 package ch.benlegiang.annotation.api.services;
 
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
-import ch.benlegiang.annotation.api.enums.CodeLanguage;
 import ch.benlegiang.annotation.api.repositories.AnnotationRepository;
 import ch.benlegiang.annotation.api.utils.AnnotationUtil;
 import lexer.HTok;
 import lexer.LTok;
 import lombok.AllArgsConstructor;
-import org.bson.types.Code;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,9 +17,8 @@ public class AnnotationService {
 
     private final AnnotationRepository annotationRepository;
 
-
-    public List<Integer> lexSourceCode(CodeLanguage codeLanguage, String sourceCode) {
-        LTok[] lToks = AnnotationUtil.lex(codeLanguage, sourceCode);
+    public List<Integer> lexSourceCode(AnnotationEntity annotationEntity) {
+        LTok[] lToks = AnnotationUtil.lex(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
 
         List<Integer> tokenIds = new ArrayList<>();
         for (LTok lTok : lToks) {
@@ -31,8 +28,8 @@ public class AnnotationService {
         return tokenIds;
     }
 
-    public List<Integer> highlightSourceCode(CodeLanguage codeLanguage, String sourceCode) {
-        HTok[] hToks = AnnotationUtil.highlight(codeLanguage, sourceCode);
+    public List<Integer> highlightSourceCode(AnnotationEntity annotationEntity) {
+        HTok[] hToks = AnnotationUtil.highlight(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
         List<Integer> hCodeValues = new ArrayList<>();
         for (HTok hTok : hToks) {
             hCodeValues.add(hTok.hCodeValue);

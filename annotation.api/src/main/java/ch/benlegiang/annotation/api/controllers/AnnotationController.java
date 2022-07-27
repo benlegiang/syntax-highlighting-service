@@ -5,9 +5,6 @@ import ch.benlegiang.annotation.api.dtos.AnnotationPostDTO;
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
 import ch.benlegiang.annotation.api.mappers.AnnotationMapper;
 import ch.benlegiang.annotation.api.services.AnnotationService;
-import ch.benlegiang.annotation.api.utils.AnnotationUtil;
-import lexer.HTok;
-import lexer.LTok;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +27,10 @@ public class AnnotationController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public AnnotationGetDTO annotate(@RequestBody AnnotationPostDTO annotationPostDto) {
-        AnnotationEntity annotationEntity = AnnotationUtil.getAnnotationEntityByPostDTO(annotationPostDto);
+        AnnotationEntity annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToAnnotationEntitiy(annotationPostDto);
 
-        List<Integer> tokenIds = annotationService.lexSourceCode(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
-        List<Integer> hCodeValues = annotationService.highlightSourceCode(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
+        List<Integer> tokenIds = annotationService.lexSourceCode(annotationEntity);
+        List<Integer> hCodeValues = annotationService.highlightSourceCode(annotationEntity);
         annotationEntity.setTokenIds(tokenIds);
         annotationEntity.setHCodeValues(hCodeValues);
 

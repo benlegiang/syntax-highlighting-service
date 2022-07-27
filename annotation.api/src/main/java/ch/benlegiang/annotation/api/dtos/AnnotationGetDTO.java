@@ -9,4 +9,5 @@ public class AnnotationGetDTO {
     private String codeLanguage;
     private String sourceCode;
     private List<Integer> hCodeValues;
+    private List<Integer> predictedHCodeValues;
 }
