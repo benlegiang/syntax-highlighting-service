@@ -61,7 +61,7 @@ public class AnnotationUtil {
                 resolver = new KotlinResolver();
                 return resolver;
             default:
-                throw new IllegalArgumentException("Please provide a code language!");
+                throw new IllegalArgumentException("Only Python3, Java and Kotlin are supported!");
         }
     }
 }
