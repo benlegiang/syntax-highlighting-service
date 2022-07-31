@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
-    return jsonify({'message':'syntax highlighting prediction api!'})
+    return jsonify({'message':'syntax highlighting prediction api'})
 
 @app.route('/predict', methods=['POST'])
 def predict():
