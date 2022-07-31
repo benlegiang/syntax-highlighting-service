@@ -1,14 +1,17 @@
 package ch.benlegiang.annotation.api.services;
 
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
+import ch.benlegiang.annotation.api.enums.CodeLanguage;
 import ch.benlegiang.annotation.api.repositories.AnnotationRepository;
 import ch.benlegiang.annotation.api.utils.AnnotationUtil;
 import lexer.HTok;
 import lexer.LTok;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -16,28 +19,20 @@ import java.util.List;
 public class AnnotationService {
 
     private final AnnotationRepository annotationRepository;
-
-    public List<Integer> lexSourceCode(AnnotationEntity annotationEntity) {
-        LTok[] lToks = AnnotationUtil.lex(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
-
-        List<Integer> tokenIds = new ArrayList<>();
-        for (LTok lTok : lToks) {
-            tokenIds.add(lTok.tokenId);
-        }
-
-        return tokenIds;
-    }
-
-    public List<Integer> highlightSourceCode(AnnotationEntity annotationEntity) {
-        HTok[] hToks = AnnotationUtil.highlight(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
-        List<Integer> hCodeValues = new ArrayList<>();
-        for (HTok hTok : hToks) {
-            hCodeValues.add(hTok.hCodeValue);
-        }
-        return hCodeValues;
-    }
+    private final MongoTemplate mongoTemplate;
 
     public void addAnnotationEntityToDatabase(AnnotationEntity annotationEntity) {
         annotationRepository.save(annotationEntity);
     }
+
+    public List<AnnotationEntity> getAnnotationsByCodeLanguage(CodeLanguage codeLanguage) {
+        Query query = new Query();
+
+        query.addCriteria(Criteria.where("codeLanguage").is("JAVA"));
+        List<AnnotationEntity> annotationEntities = mongoTemplate.find(query, AnnotationEntity.class);
+
+        return annotationEntities;
+    }
+
+
 }

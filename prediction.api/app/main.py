@@ -1,16 +1,20 @@
-from flask import Flask, jsonify
-from app.SHModelUtils import *
+from flask import Flask, jsonify, request
+from app.utils.SHModelUtils import *
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
-    return jsonify({'message':'syntax highlighting prediction api'})
+    return jsonify({'message':'syntax highlighting prediction api!'})
 
 @app.route('/predict', methods=['POST'])
 def predict():
     # TODO!!!
-    model = SHModel(PYTHON3_LANG_NAME, "PythonModel")
+    
+    data = request.get_json()
+
+    
+    model = SHModel(PYTHON3_LANG_NAME, "PythonModel") # Second argument: name for pytorch file
 
     # tokenIds from LToks for prediction
     model.setup_for_prediction()
@@ -25,5 +29,5 @@ def pull_latest_model():
     pass
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5555)
 
