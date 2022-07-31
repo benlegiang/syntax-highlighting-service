@@ -1,4 +1,4 @@
-name: Build and Publish Prediction API Image to Docker Hub
+name: Build - Publish - Deploy Prediction API Image
 
 on:
   push:
@@ -38,3 +38,19 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create SSH Connection to VM
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{secrets.UBUNTU_VM_HOST}}
+        username: ${{secrets.UBUNTU_VM_USER}}
+        key: ${{secrets.UBUNTU_VM_SECRET}}
+        port: 22
+        script: |
+          docker login --username benlegiang --password-stdin < docker_pwd.txt
+          cd syntax-highlighting-service
+          git pull origin master
+          bash deploy.sh
