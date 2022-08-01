@@ -29,5 +29,5 @@ def pull_latest_model():
     pass
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5555)
+    app.run(debug=True)
 

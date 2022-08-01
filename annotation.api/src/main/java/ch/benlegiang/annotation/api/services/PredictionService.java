@@ -10,7 +10,7 @@ public class PredictionService {
 
 
     public PredictionService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://syntax-highlighting-service-prediction-api:5555").build();
+        this.webClient = webClientBuilder.baseUrl("http://syntax-highlighting-service-prediction-api:8000").build();
         // this.webClient = webClientBuilder.baseUrl("http://localhost:5555").build();
 
     }
@@ -19,8 +19,8 @@ public class PredictionService {
 
         // MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
 
-        String response = this.webClient.post()
-                .uri("/predict")
+        String response = this.webClient.get()
+                .uri("/")
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

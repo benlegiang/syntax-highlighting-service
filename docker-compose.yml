@@ -24,12 +24,12 @@ services:
     build: ./prediction.api
     image: benlegiang/syntax-highlighting-service-prediction-api:master
     ports:
-      - $PREDICTION_API_HOST_PORT:5555
+      - $PREDICTION_API_HOST_PORT:8000
     deploy:
       resources:
         limits:
           cpus: '0.5'
-          memory: 512M
+          memory: 1024M
     networks:
       - backend 
   rest-api:
@@ -44,7 +44,7 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: 1024M
+          memory: 512M
     networks:
       - backend    
     restart: always
