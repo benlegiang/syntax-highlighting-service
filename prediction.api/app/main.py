@@ -16,27 +16,26 @@ def predict():
         codeLanguage = requestBody['codeLanguage']
         tokenIds = requestBody['tokenIds']
 
-        match codeLanguage:
-            case 'PYTHON3':
-                # pythonModel.persist_model()
-                pythonModel = SHModel(PYTHON3_LANG_NAME, "python_model_latest")
-                pythonModel.setup_for_prediction()
-                prediction = pythonModel.predict(tokenIds)
+        if codeLanguage == 'PYTHON3':
+             # pythonModel.persist_model()
+            pythonModel = SHModel(PYTHON3_LANG_NAME, "python_model_latest")
+            pythonModel.setup_for_prediction()
+            prediction = pythonModel.predict(tokenIds)
 
-                return jsonify(hCodes = prediction)
+            return jsonify(hCodes = prediction)
 
-            case 'JAVA':
-                javaModel = SHModel(JAVA_LANG_NAME, 'java_model_latest')
-                javaModel.setup_for_prediction()
-                prediction = javaModel.predict(tokenIds)
+        elif codeLanguage == 'JAVA':
+            javaModel = SHModel(JAVA_LANG_NAME, 'java_model_latest')
+            javaModel.setup_for_prediction()
+            prediction = javaModel.predict(tokenIds)
 
-                return jsonify(hCodes = prediction)
+            return jsonify(hCodes = prediction)
 
-            case 'KOTLIN':
-                kotlinModel = SHModel(KOTLIN_LANG_NAME, 'kotlin_model_latest')
-                kotlinModel.setup_for_prediction()
-                prediction = kotlinModel.predict(tokenIds)
-                return jsonify(hCodes = prediction)
+        elif codeLanguage == 'KOTLIN':
+            kotlinModel = SHModel(KOTLIN_LANG_NAME, 'kotlin_model_latest')
+            kotlinModel.setup_for_prediction()
+            prediction = kotlinModel.predict(tokenIds)
+            return jsonify(hCodes = prediction)
 
     else:
         return 'Content-Type is not supported!'
