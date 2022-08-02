@@ -11,6 +11,8 @@ services:
     volumes:
       - db-data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - 27017:27017
     deploy:
       resources:
         limits:
@@ -28,10 +30,21 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
+          cpus: '1'
           memory: 1024M
     networks:
       - backend 
+  training-api:
+    container_name: syntax-highlighting-service-training-api
+    build: ./training.api
+    image: benlegiang/syntax-highlighting-service-training-api:master
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+    networks:
+      - backend
   rest-api:
     container_name: syntax-highlighting-service-rest-api
     build: ./rest.api
@@ -43,7 +56,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: '0.5'
           memory: 512M
     networks:
       - backend    
@@ -54,11 +67,13 @@ services:
     image: benlegiang/syntax-highlighting-service-annotation-api:master
     depends_on:
       - mongodb
+    ports:
+      - 8080:8080
     deploy:
       resources:
         limits:
           cpus: '1.5'
-          memory: 1536M
+          memory: 1024M
     restart: always
     networks:
       - backend
