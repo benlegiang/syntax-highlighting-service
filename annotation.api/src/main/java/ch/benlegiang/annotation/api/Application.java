@@ -10,4 +10,9 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 	}
 
+
+	/*server.compression.enabled=true
+	server.compression.min-response-size=5KB
+	server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain
+	*/
 }
