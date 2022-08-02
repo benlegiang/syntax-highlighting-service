@@ -18,21 +18,21 @@ def predict():
 
         if codeLanguage == 'PYTHON3':
              # pythonModel.persist_model()
-            pythonModel = SHModel(PYTHON3_LANG_NAME, "python_model_latest")
+            pythonModel = SHModel(PYTHON3_LANG_NAME, "model_latest")
             pythonModel.setup_for_prediction()
             prediction = pythonModel.predict(tokenIds)
 
             return jsonify(hCodes = prediction)
 
         elif codeLanguage == 'JAVA':
-            javaModel = SHModel(JAVA_LANG_NAME, 'java_model_latest')
+            javaModel = SHModel(JAVA_LANG_NAME, 'model_latest')
             javaModel.setup_for_prediction()
             prediction = javaModel.predict(tokenIds)
 
             return jsonify(hCodes = prediction)
 
         elif codeLanguage == 'KOTLIN':
-            kotlinModel = SHModel(KOTLIN_LANG_NAME, 'kotlin_model_latest')
+            kotlinModel = SHModel(KOTLIN_LANG_NAME, 'model_latest')
             kotlinModel.setup_for_prediction()
             prediction = kotlinModel.predict(tokenIds)
             return jsonify(hCodes = prediction)
