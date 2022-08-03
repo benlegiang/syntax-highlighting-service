@@ -1,11 +1,40 @@
-from flask import Flask, Response, jsonify, request
+from flask import Flask, jsonify, request
 from app.utils.SHModelUtils import *
+from app.services.ModelService import *
 
 app = Flask(__name__)
+
+def load_python_model():
+    python_model: SHModel = load_model_from_db('test', 'python3')
+    print('Loading model sucessfully')
+    # python_model.setup_for_prediction()
+    python_model.setup_for_finetuning()
+    print('Setting up model for prediction')
+    return python_model
+
+# UNCOMMENT WHILE THERE IS NO SUCH MODEL ON THE DATABASE
+# def load_java_model():
+#     java_model: SHModel = load_model_from_db('test', 'java')
+#     java_model.setup_for_prediction()
+
+#     return java_model
+
+# def load_kotlin_model():
+#     kotlin: SHModel = load_model_from_db('test', 'kotlin')
+#     kotlin_model.setup_for_prediction()
+
+#     return kotlin_model
+
+python_model = load_python_model()
+
+# java_model = load_java_model()
+# kotlin_model = load_kotlin_model()
+
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
     return jsonify({'message':'syntax highlighting prediction api'})
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -15,26 +44,21 @@ def predict():
         requestBody = request.json
         codeLanguage = requestBody['codeLanguage']
         tokenIds = requestBody['tokenIds']
+        hCodeValues = requestBody['hCodeValues']
 
         if codeLanguage == 'PYTHON3':
-             # pythonModel.persist_model()
-            pythonModel = SHModel(PYTHON3_LANG_NAME, "model_latest")
-            pythonModel.setup_for_prediction()
-            prediction = pythonModel.predict(tokenIds)
-
-            return jsonify(hCodes = prediction)
+            # prediction = python_model.predict(tokenIds)
+            loss = python_model.finetune_on(tokenIds, hCodeValues)
+            # return jsonify(hCodes = prediction)
+            return jsonify(loss = loss)
 
         elif codeLanguage == 'JAVA':
-            javaModel = SHModel(JAVA_LANG_NAME, 'model_latest')
-            javaModel.setup_for_prediction()
-            prediction = javaModel.predict(tokenIds)
+            prediction = java_model.predict(tokenIds)
 
             return jsonify(hCodes = prediction)
 
         elif codeLanguage == 'KOTLIN':
-            kotlinModel = SHModel(KOTLIN_LANG_NAME, 'model_latest')
-            kotlinModel.setup_for_prediction()
-            prediction = kotlinModel.predict(tokenIds)
+            prediction = kotlin_model.predict(tokenIds)
             return jsonify(hCodes = prediction)
 
     else:
