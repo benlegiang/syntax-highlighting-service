@@ -15,7 +15,7 @@ python_file_ex = '.py'
 java_file_ex = '.java'
 kotlin_file_ex = '.kt'
 
-branches = ['/tree/master', '/tree/main']
+branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
 scape_dir_depth = 5
 
@@ -63,7 +63,6 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
                     if code_lang_extension in href:
                         code_file_urls.append(github + href)
                     else: 
-                        print(href)
                         directory_urls.append(github + href)
                 else:
                     continue
@@ -75,13 +74,16 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
 
 def get_code_file_urls_from_repo_url(code_lang_extension, repo_url, iteration = 0, directory_urls = [], code_file_urls = []):
 
-    # Termination condition
+    # Termination condition 1
     if iteration == scape_dir_depth:
+        return code_file_urls
+
+    # Termination condition 2
+    if iteration > 0 and len(directory_urls) == 0:
         return code_file_urls
 
     # Start the search from the root directory of repo
     # Code files present in root dir are saved in 'c_urls'
-
     
     if iteration == 0:
         d_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, repo_url)
@@ -104,6 +106,12 @@ def get_code_file_urls_from_repo_url(code_lang_extension, repo_url, iteration = 
 
 
 
+def test(code_lang_extension, url):
+    result = get_code_file_urls_from_repo_url(code_lang_extension, url)
+
+    return result
+
+
 def get_source_code_from_file(html):
 
     pass
@@ -123,18 +131,20 @@ def runner(code_lang):
     urls = repos
     threads = []
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         # for url in urls:
         #     threads.append(executor.submit(get_code_file_urls_from_repo_url, code_lang_extension, url))
         #     time.sleep(3)
 
         # Uncomment above and comment this since it's only for testing purposes    
         one_repo = urls[0]
-        threads.append(executor.submit(get_code_file_urls_from_repo_url, code_lang_extension, one_repo))
+        # TODO: Fix this so that multi threading works with recursive function
+
+        threads.append(executor.submit(test, code_lang_extension, one_repo))
 
 
         for request in as_completed(threads):
-            # print(request.result())
+            print(request.result())
             pass
 
 if __name__ == '__main__':
