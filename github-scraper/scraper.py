@@ -146,7 +146,7 @@ def run(code_lang):
 
 
     seconds = t1_stop - t1_start
-    print("Finished scraping in " + seconds " seconds")
+    print("Finished scraping in " + seconds + " seconds")
 
 
 
