@@ -19,9 +19,11 @@ kotlin_file_ex = '.kt'
 
 branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
-scape_dir_depth = 4
+scape_dir_depth = 3
 
-results = []
+python_results = []
+java_results = []
+kotlin_results = []
 
 
 def get_trending_repo_urls(language_trending_repo):
@@ -77,9 +79,14 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
 
 def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 0, directory_urls = [], code_file_urls = []):
 
+    test = code_file_urls
+    print(f'------- {root_url} with iteration {iteration} -------')
+    print(test)
+    print("")
     # Termination condition 
     if iteration == scape_dir_depth:
-        results.append(code_file_urls)
+        # print("Terminated: ", code_file_urls)
+        python_results.append(code_file_urls)
         return None
 
     # Start the search from the root directory of repo
@@ -92,14 +99,13 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 
         get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, d_urls, code_file_urls)
     else:
         sub_dir_urls_from_dir = []
+        code_file_urls_found = []
         for dir in directory_urls:
-            # print(dir)
             dir_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, dir)
             sub_dir_urls_from_dir.extend(dir_urls)
-            code_file_urls.extend(c_urls)
-            # print(code_file_urls)
+            code_file_urls_found.extend(c_urls)
 
-        get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls)
+        get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls_found)
 
 
 def get_source_code_from_file(html):
@@ -133,21 +139,17 @@ def run(code_lang):
     test = [root_urls[0], root_urls[1]]
 
 
-    for url in test:
-        worker = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url))
-        worker.start()
-        threads.append(worker)
+    for url in root_urls:
+        process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url, 0, [], []))
+        process.start()
+        threads.append(process)
     
     for process in threads:
         process.join()
 
     t1_stop = time.perf_counter()
 
-    test = results
-
-    for i in test:
-        print(i)
-        print("Files in repo: ", len(i))
+    # print(python_results)
 
     seconds = t1_stop - t1_start
     print(f'Finished scraping in {seconds} seconds')
