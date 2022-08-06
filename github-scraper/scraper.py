@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed, thread
+from logging import root
 from threading import *
 import time
 from webbrowser import get
@@ -18,7 +19,7 @@ kotlin_file_ex = '.kt'
 
 branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
-scape_dir_depth = 3
+scape_dir_depth = 4
 
 results = []
 
@@ -129,9 +130,10 @@ def run(code_lang):
     
     threads = []
 
-    # test = [root_urls[0]]
+    test = [root_urls[0], root_urls[1]]
 
-    for url in root_urls:
+
+    for url in test:
         worker = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url))
         worker.start()
         threads.append(worker)
@@ -141,13 +143,16 @@ def run(code_lang):
 
     t1_stop = time.perf_counter()
 
-    for repo in results:
-        print(repo)
+    test = results
 
-
+    for i in test:
+        print(i)
+        print("Files in repo: ", len(i))
 
     seconds = t1_stop - t1_start
     print(f'Finished scraping in {seconds} seconds')
+
+    print("number of repos: ", len(root_urls))
 
 
 
