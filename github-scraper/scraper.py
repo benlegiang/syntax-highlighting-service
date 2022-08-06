@@ -71,7 +71,7 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
         return directory_urls, code_file_urls
         
     except:
-        return None, None
+        pass
 
 def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 0, directory_urls = [], code_file_urls = []):
 
@@ -140,13 +140,21 @@ def run(code_lang):
 
     t1_stop = time.perf_counter()
 
+
+    history = []
+    duplicates_counter = 0
     for repo in results:
         for file_url in repo:
+            history.append(file_url)
+            if file_url in history:
+                duplicates_counter += 1
             print(file_url)
+
 
 
     seconds = t1_stop - t1_start
     print("Finished scraping in " + seconds + " seconds")
+    print("# of duplicates: ", duplicates_counter)
 
 
 
