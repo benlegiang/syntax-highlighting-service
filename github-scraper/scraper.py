@@ -69,7 +69,6 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
                 else:
                     continue
         
-        print(directory_urls)
         return directory_urls, code_file_urls
         
     except:
