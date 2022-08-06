@@ -74,26 +74,24 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
                     continue
         return directory_urls, code_file_urls
         
-    except Exception as e:
-        return None
+    except:
+        pass
 
 def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 0, directory_urls = [], code_file_urls = []):
 
     # Termination condition 
     if iteration == scape_dir_depth:
         results.append(code_file_urls)
-        return code_file_urls
+        return None
 
     # Start the search from the root directory of repo
     # Code files present in root dir are saved in 'c_urls'
     
-    # rLock.acquire()
     if iteration == 0:
         d_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, root_url)
         code_file_urls.extend(c_urls)
 
         get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, d_urls, code_file_urls)
-        # rLock.release()
     else:
         sub_dir_urls_from_dir = []
         for dir in directory_urls:
@@ -104,10 +102,6 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 
             # print(code_file_urls)
 
         get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls)
-        # rLock.release()
-
-    return code_file_urls
-
 
 
 def get_source_code_from_file(html):
@@ -158,8 +152,9 @@ def run(code_lang):
     #     print(result)
     threads = []
 
+    test = [root_urls[0]]
 
-    for url in root_urls:
+    for url in test:
         worker = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url))
         worker.start()
         threads.append(worker)
@@ -169,11 +164,14 @@ def run(code_lang):
 
     t1_stop = time.perf_counter()
 
-    print("-----------")
+    for repo in results:
+        for file_url in repo:
+            print(file_url)
 
-    print(results)
 
     print("Elapsed time during the whole program in seconds:", t1_stop-t1_start)
+
+
 
 if __name__ == '__main__':
     # runner('PYTHON3')
