@@ -141,12 +141,8 @@ def run(code_lang):
 
     t1_stop = time.perf_counter()
 
-
-    history = []
-    duplicates_counter = 0
     for repo in results:
-        for file_url in repo:
-            print(file_url)
+        print(repo)
 
 
 
