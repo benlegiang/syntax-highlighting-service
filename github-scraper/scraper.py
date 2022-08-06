@@ -71,7 +71,7 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
         return directory_urls, code_file_urls
         
     except:
-        pass
+        return None, None
 
 def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 0, directory_urls = [], code_file_urls = []):
 
@@ -121,6 +121,8 @@ def get_root_urls(code_lang):
 
 def run(code_lang):
 
+    print("Start scraping...")
+
     t1_start = time.perf_counter()
     root_urls, code_lang_extension = get_root_urls(code_lang)
     
@@ -143,7 +145,8 @@ def run(code_lang):
             print(file_url)
 
 
-    print("Elapsed time during the whole program in seconds:", t1_stop-t1_start)
+    seconds = t1_stop - t1_start
+    print("Finished scraping in " + seconds " seconds")
 
 
 
