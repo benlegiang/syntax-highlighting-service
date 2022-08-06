@@ -1,14 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed, thread
-from logging import root
 from threading import *
 import time
-from typing import List
 from webbrowser import get
 from bs4 import BeautifulSoup
 import requests
-import queue
 
-import urllib3
 
 github = 'https://github.com/'
 
@@ -108,20 +104,6 @@ def get_source_code_from_file(html):
 
     pass
 
-class ScrapeThread(Thread):
-
-    def __init__(self, semaphore, code_lang_extension, root_url):
-        Thread.__init__(self)
-        self.value = None
-        self.semaphore = semaphore
-        self.code_lang_extension = code_lang_extension
-        self.root_url = root_url
- 
-    def run(self):
-
-        self.value = get_code_file_urls_from_repo_url(self.code_lang_extension, self.root_url)
-        return self.value
-
 def get_root_urls(code_lang):
 
     if code_lang == 'PYTHON3':
@@ -142,19 +124,11 @@ def run(code_lang):
     t1_start = time.perf_counter()
     root_urls, code_lang_extension = get_root_urls(code_lang)
     
-    semaphore = Semaphore(5)
-
-    # for url in root_urls:
-    #     worker = ScrapeThread(semaphore, code_lang_extension, url)
-    #     worker.start()
-
-    #     result = worker.value
-    #     print(result)
     threads = []
 
-    test = [root_urls[0]]
+    # test = [root_urls[0]]
 
-    for url in test:
+    for url in root_urls:
         worker = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url))
         worker.start()
         threads.append(worker)
