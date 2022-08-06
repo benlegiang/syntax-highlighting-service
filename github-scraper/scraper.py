@@ -1,11 +1,8 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed, thread
-from logging import root
 from threading import *
 import time
-from webbrowser import get
 from bs4 import BeautifulSoup
 import requests
-
+import sys
 
 github = 'https://github.com/'
 
@@ -19,11 +16,9 @@ kotlin_file_ex = '.kt'
 
 branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
-scape_dir_depth = 6
+scape_dir_depth = 5
 
-python_results = []
-java_results = []
-kotlin_results = []
+results = []
 
 
 def get_trending_repo_urls(language_trending_repo):
@@ -65,7 +60,8 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
                 is_href_valid_dir = bool([el for el in invalid_dirs if href != None and el not in href])
 
                 if is_href_in_branch == True and is_href_valid_dir == True:   
-                    if code_lang_extension in href:
+                    # if code_lang_extension in href:
+                    if href.endswith(code_lang_extension):
                         code_file_urls.append(github + href)
                     else: 
                         directory_urls.append(github + href)
@@ -77,7 +73,7 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
     except:
         return [], []
 
-def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0, directory_urls=[], code_file_urls=[], temp=[]):
+def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0, directory_urls=[], code_file_urls=[]):
 
     # test = code_file_urls
     # print(f'------- {root_url} with iteration {iteration} -------')
@@ -86,10 +82,8 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0,
 
     # Termination condition 
     if iteration == scape_dir_depth:
-        python_results.append(code_file_urls)
+        results.append(code_file_urls)
         return None
-
-    # print(code_file_urls)
     
     # Start the search from the root directory of repo
     # Code files present in root dir are saved in 'c_urls'
@@ -101,7 +95,7 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0,
         get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, d_urls, code_file_urls)
     else:
         sub_dir_urls_from_dir = []
-        code_file_urls_found = []
+        # code_file_urls_found = []
         for dir in directory_urls:
             dir_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, dir)
             sub_dir_urls_from_dir.extend(dir_urls)
@@ -129,7 +123,7 @@ def get_root_urls(code_lang):
     return repos, code_lang_extension
 
 
-def run(code_lang):
+def scrape(code_lang):
 
     print("Start scraping...")
 
@@ -138,9 +132,7 @@ def run(code_lang):
     
     threads = []
 
-    test = [root_urls[0], root_urls[1]]
-
-    for url in test:
+    for url in root_urls:
         process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url, 0, [], []))
         process.start()
         threads.append(process)
@@ -150,7 +142,7 @@ def run(code_lang):
 
     t1_stop = time.perf_counter()
 
-    print(python_results)
+    print(results)
 
     seconds = t1_stop - t1_start
     print(f'Finished scraping in {seconds} seconds')
@@ -162,13 +154,8 @@ def send_code_for_annotation():
     pass
 
 
-
 if __name__ == '__main__':
-    # runner('PYTHON3')
-    run('PYTHON3')
-
-
-
+    scrape(sys.argv[1])
 
 # def runner(code_lang):
 
