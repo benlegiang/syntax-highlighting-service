@@ -19,7 +19,7 @@ kotlin_file_ex = '.kt'
 
 branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
-scape_dir_depth = 3
+scape_dir_depth = 6
 
 python_results = []
 java_results = []
@@ -77,18 +77,20 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
     except:
         return [], []
 
-def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 0, directory_urls = [], code_file_urls = []):
+def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0, directory_urls=[], code_file_urls=[], temp=[]):
 
-    test = code_file_urls
-    print(f'------- {root_url} with iteration {iteration} -------')
-    print(test)
-    print("")
+    # test = code_file_urls
+    # print(f'------- {root_url} with iteration {iteration} -------')
+    # print(test)
+    # print("")
+
     # Termination condition 
     if iteration == scape_dir_depth:
-        # print("Terminated: ", code_file_urls)
         python_results.append(code_file_urls)
         return None
 
+    # print(code_file_urls)
+    
     # Start the search from the root directory of repo
     # Code files present in root dir are saved in 'c_urls'
     
@@ -103,9 +105,9 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 
         for dir in directory_urls:
             dir_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, dir)
             sub_dir_urls_from_dir.extend(dir_urls)
-            code_file_urls_found.extend(c_urls)
+            code_file_urls.extend(c_urls)
 
-        get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls_found)
+        get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls)
 
 
 def get_source_code_from_file(html):
@@ -138,8 +140,7 @@ def run(code_lang):
 
     test = [root_urls[0], root_urls[1]]
 
-
-    for url in root_urls:
+    for url in test:
         process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url, 0, [], []))
         process.start()
         threads.append(process)
@@ -149,12 +150,16 @@ def run(code_lang):
 
     t1_stop = time.perf_counter()
 
-    # print(python_results)
+    print(python_results)
 
     seconds = t1_stop - t1_start
     print(f'Finished scraping in {seconds} seconds')
 
     print("number of repos: ", len(root_urls))
+
+def send_code_for_annotation():
+
+    pass
 
 
 
