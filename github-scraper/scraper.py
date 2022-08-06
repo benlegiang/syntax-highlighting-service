@@ -1,9 +1,14 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, thread
+from logging import root
+from threading import *
 import time
 from typing import List
 from webbrowser import get
 from bs4 import BeautifulSoup
 import requests
+import queue
+
+import urllib3
 
 github = 'https://github.com/'
 
@@ -17,7 +22,9 @@ kotlin_file_ex = '.kt'
 
 branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
-scape_dir_depth = 5
+scape_dir_depth = 3
+
+results = []
 
 
 def get_trending_repo_urls(language_trending_repo):
@@ -39,7 +46,6 @@ def get_trending_repo_urls(language_trending_repo):
 
         return trending_repos_urls
     except Exception as e:
-        print(e)
         return None
 
 def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
@@ -69,54 +75,60 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
         return directory_urls, code_file_urls
         
     except Exception as e:
-        print(e)
         return None
 
-def get_code_file_urls_from_repo_url(code_lang_extension, repo_url, iteration = 0, directory_urls = [], code_file_urls = []):
+def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration = 0, directory_urls = [], code_file_urls = []):
 
-    # Termination condition 1
+    # Termination condition 
     if iteration == scape_dir_depth:
-        return code_file_urls
-
-    # Termination condition 2
-    if iteration > 0 and len(directory_urls) == 0:
+        results.append(code_file_urls)
         return code_file_urls
 
     # Start the search from the root directory of repo
     # Code files present in root dir are saved in 'c_urls'
     
+    # rLock.acquire()
     if iteration == 0:
-        d_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, repo_url)
+        d_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, root_url)
         code_file_urls.extend(c_urls)
-        iteration += 1
 
-        get_code_file_urls_from_repo_url(code_lang_extension, repo_url, iteration, d_urls, code_file_urls)
+        get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, d_urls, code_file_urls)
+        # rLock.release()
+    else:
+        sub_dir_urls_from_dir = []
+        for dir in directory_urls:
+            # print(dir)
+            dir_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, dir)
+            sub_dir_urls_from_dir.extend(dir_urls)
+            code_file_urls.extend(c_urls)
+            # print(code_file_urls)
 
-    sub_dir_urls_from_dir = []
-    for dir in directory_urls:
-        # print(dir)
-        dir_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, dir)
-        sub_dir_urls_from_dir.extend(dir_urls)
-        code_file_urls.extend(c_urls)
-        # print(code_file_urls)
-    
-    iteration += 1
+        get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls)
+        # rLock.release()
 
-    get_code_file_urls_from_repo_url(code_lang_extension, repo_url, iteration, sub_dir_urls_from_dir, code_file_urls)
+    return code_file_urls
 
-
-
-def test(code_lang_extension, url):
-    result = get_code_file_urls_from_repo_url(code_lang_extension, url)
-
-    return result
 
 
 def get_source_code_from_file(html):
 
     pass
 
-def runner(code_lang):
+class ScrapeThread(Thread):
+
+    def __init__(self, semaphore, code_lang_extension, root_url):
+        Thread.__init__(self)
+        self.value = None
+        self.semaphore = semaphore
+        self.code_lang_extension = code_lang_extension
+        self.root_url = root_url
+ 
+    def run(self):
+
+        self.value = get_code_file_urls_from_repo_url(self.code_lang_extension, self.root_url)
+        return self.value
+
+def get_root_urls(code_lang):
 
     if code_lang == 'PYTHON3':
         repos = get_trending_repo_urls(python_trending_repos)
@@ -128,24 +140,63 @@ def runner(code_lang):
         repos = get_trending_repo_urls(kotlin_trending_repos)
         code_lang_extension = kotlin_file_ex
 
-    urls = repos
+    return repos, code_lang_extension
+
+
+def run(code_lang):
+
+    t1_start = time.perf_counter()
+    root_urls, code_lang_extension = get_root_urls(code_lang)
+    
+    semaphore = Semaphore(5)
+
+    # for url in root_urls:
+    #     worker = ScrapeThread(semaphore, code_lang_extension, url)
+    #     worker.start()
+
+    #     result = worker.value
+    #     print(result)
     threads = []
 
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        # for url in urls:
-        #     threads.append(executor.submit(get_code_file_urls_from_repo_url, code_lang_extension, url))
-        #     time.sleep(3)
 
-        # Uncomment above and comment this since it's only for testing purposes    
-        one_repo = urls[0]
-        # TODO: Fix this so that multi threading works with recursive function
+    for url in root_urls:
+        worker = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url))
+        worker.start()
+        threads.append(worker)
+    
+    for process in threads:
+        process.join()
 
-        threads.append(executor.submit(test, code_lang_extension, one_repo))
+    t1_stop = time.perf_counter()
 
+    print("-----------")
 
-        for request in as_completed(threads):
-            print(request.result())
-            pass
+    print(results)
+
+    print("Elapsed time during the whole program in seconds:", t1_stop-t1_start)
 
 if __name__ == '__main__':
-    runner('PYTHON3')
+    # runner('PYTHON3')
+    run('PYTHON3')
+
+
+
+
+# def runner(code_lang):
+
+#     root_urls, code_lang_extension = get_root_urls(code_lang)
+#     threads = []
+
+#     with ThreadPoolExecutor(max_workers=20) as executor:
+#         for url in root_urls:
+#             threads.append(executor.submit(get_code_file_urls_from_repo_url, code_lang_extension, url))
+#             time.sleep(2)
+
+#         # Uncomment above and comment this since it's only for testing purposes    
+#         # one_repo = urls[2]
+#         # TODO: Fix this so that multi threading works with recursive function
+
+#         # threads.append(executor.submit(get_code_file_urls_from_repo_url, code_lang_extension, one_repo))
+
+#         for request in as_completed(threads):
+#             print("PRINTING RESULT OF EACH SCRAPED REPO: ", request.result())
