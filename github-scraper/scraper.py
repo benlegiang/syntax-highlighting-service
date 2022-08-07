@@ -119,9 +119,7 @@ def scrape(code_lang):
     
     threads = []
 
-    test = [root_urls[3]]
-
-    for url in test:
+    for url in root_urls:
         process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, 
         url, 0, [], []))
         process.start()
@@ -136,22 +134,61 @@ def scrape(code_lang):
     print(f'Finished scraping in {seconds} seconds')
     print(f'{len(root_urls)} repositories scanned')
 
-def extract_source_code_from_file():
+def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
 
     timeout = 10
-    time.sleep(timeout)
     print(f'Waiting {timeout} seconds to avoid abuse timeout')
+    time.sleep(timeout)
+    temp_source_codes = []
     for repo in scraped_file_urls:
         for file in repo:
-            single_repo_html = requests.get(file, stream=True).text
-            soup = BeautifulSoup(single_repo_html, features='html.parser')
+            single_file_html = requests.get(file, stream=True).text
+            soup = BeautifulSoup(single_file_html, features='html.parser')
             lines = soup.find_all('td', class_="blob-code blob-code-inner js-file-line")
+            src = ''
             for line in lines:
-                print(line.text)
+                if line.text != '':
+                    src += line.text
+                else: continue
+            # for line in lines:
+            #     if filter_src_line(line, code_lang):
+            #         l = line.text.replace('\n', ' ')
+            #         src += line.text
+            #     else:
+            #         continue
+            temp_source_codes.append(src)
 
-def filter_source_code():
+    
+    limited_source_codes = get_src_by_num_of_tokens(temp_source_codes, num_tokens, True)
+    
+    print("Files: ", len(limited_source_codes))
+    print(limited_source_codes)
 
-    pass
+def filter_src_line(line, code_lang):
+
+    if code_lang == 'PYTHON3':
+        # if "#" in line or "'''" in line:
+        if "#" in line:
+            return False
+        else:
+            return True
+
+    # Check other languages for comments
+
+def get_src_by_num_of_tokens(temp_src, num_tokens, backwards):
+
+    result = []
+    for content in temp_src:
+        num_lines = len(content)
+        if num_tokens >= num_lines:
+            result.append(content)
+        
+        if num_tokens < num_lines and not backwards:
+            result.append(content[0:num_tokens])
+        else:
+            result.append(content[-num_tokens:])
+
+    return result
 
 def send_code_for_annotation():
     pass
@@ -159,4 +196,4 @@ def send_code_for_annotation():
 
 if __name__ == '__main__':
     scrape(sys.argv[1])
-    extract_source_code_from_file()
+    extract_source_code_from_file(sys.argv[1], int(sys.argv[2]), bool(sys.argv[3]))
