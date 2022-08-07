@@ -18,7 +18,7 @@ branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
 scape_dir_depth = 5
 
-results = []
+scraped_file_urls = []
 
 
 def get_trending_repo_urls(language_trending_repo):
@@ -52,7 +52,6 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
         code_file_urls = []
 
         for dir in directories:
-
             dir_link_tag = dir.find_all('a', class_ = 'js-navigation-open Link--primary')
             for link in dir_link_tag:
                 href = link.get('href')
@@ -75,18 +74,10 @@ def get_dirs_and_files_from_dir_url(code_lang_extension, dir_url):
 
 def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0, directory_urls=[], code_file_urls=[]):
 
-    # test = code_file_urls
-    # print(f'------- {root_url} with iteration {iteration} -------')
-    # print(test)
-    # print("")
-
     # Termination condition 
     if iteration == scape_dir_depth:
-        results.append(code_file_urls)
+        scraped_file_urls.append(code_file_urls)
         return None
-    
-    # Start the search from the root directory of repo
-    # Code files present in root dir are saved in 'c_urls'
     
     if iteration == 0:
         d_urls, c_urls = get_dirs_and_files_from_dir_url(code_lang_extension, root_url)
@@ -102,11 +93,7 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0,
             code_file_urls.extend(c_urls)
 
         get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls)
-
-
-def get_source_code_from_file(html):
-
-    pass
+    time.sleep(1)
 
 def get_root_urls(code_lang):
 
@@ -132,8 +119,11 @@ def scrape(code_lang):
     
     threads = []
 
-    for url in root_urls:
-        process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, url, 0, [], []))
+    test = [root_urls[3]]
+
+    for url in test:
+        process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, 
+        url, 0, [], []))
         process.start()
         threads.append(process)
     
@@ -142,36 +132,31 @@ def scrape(code_lang):
 
     t1_stop = time.perf_counter()
 
-    print(results)
-
     seconds = t1_stop - t1_start
     print(f'Finished scraping in {seconds} seconds')
+    print(f'{len(root_urls)} repositories scanned')
 
-    print("number of repos: ", len(root_urls))
+def extract_source_code_from_file():
+
+    timeout = 10
+    time.sleep(timeout)
+    print(f'Waiting {timeout} seconds to avoid abuse timeout')
+    for repo in scraped_file_urls:
+        for file in repo:
+            single_repo_html = requests.get(file, stream=True).text
+            soup = BeautifulSoup(single_repo_html, features='html.parser')
+            lines = soup.find_all('td', class_="blob-code blob-code-inner js-file-line")
+            for line in lines:
+                print(line.text)
+
+def filter_source_code():
+
+    pass
 
 def send_code_for_annotation():
-
     pass
 
 
 if __name__ == '__main__':
     scrape(sys.argv[1])
-
-# def runner(code_lang):
-
-#     root_urls, code_lang_extension = get_root_urls(code_lang)
-#     threads = []
-
-#     with ThreadPoolExecutor(max_workers=20) as executor:
-#         for url in root_urls:
-#             threads.append(executor.submit(get_code_file_urls_from_repo_url, code_lang_extension, url))
-#             time.sleep(2)
-
-#         # Uncomment above and comment this since it's only for testing purposes    
-#         # one_repo = urls[2]
-#         # TODO: Fix this so that multi threading works with recursive function
-
-#         # threads.append(executor.submit(get_code_file_urls_from_repo_url, code_lang_extension, one_repo))
-
-#         for request in as_completed(threads):
-#             print("PRINTING RESULT OF EACH SCRAPED REPO: ", request.result())
+    extract_source_code_from_file()
