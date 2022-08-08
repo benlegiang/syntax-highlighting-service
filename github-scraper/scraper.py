@@ -10,15 +10,19 @@ python_trending_repos = 'https://github.com/trending/python?since=daily'
 java_trending_repos = 'https://github.com/trending/java?since=daily'
 kotlin_trending_repos = 'https://github.com/trending/kotlin?since=daily'
 
+annotation_api_url_local = 'http://localhost:8081/api/v1/highlight'
+annotation_api_url = 'http://syntax-highlighting-service-rest-api:8081/api/v1/highlight'
+
 python_file_ex = '.py'
 java_file_ex = '.java'
 kotlin_file_ex = '.kt'
 
 branches = ['/tree/master', '/tree/main', '/blob/master', '/blob/main']
 invalid_dirs = ['/tree/master/.', '/tree/main/.']
-scape_dir_depth = 5
+scape_dir_depth = 4
 
 scraped_file_urls = []
+source_codes = []
 
 
 def get_trending_repo_urls(language_trending_repo):
@@ -110,7 +114,7 @@ def get_root_urls(code_lang):
     return repos, code_lang_extension
 
 
-def scrape(code_lang):
+def scrape(code_lang, repo_limit):
 
     print("Start scraping...")
 
@@ -119,7 +123,10 @@ def scrape(code_lang):
     
     threads = []
 
-    for url in root_urls:
+    repo_root_urls = root_urls[0:repo_limit]
+    
+
+    for url in repo_root_urls:
         process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, 
         url, 0, [], []))
         process.start()
@@ -132,7 +139,7 @@ def scrape(code_lang):
 
     seconds = t1_stop - t1_start
     print(f'Finished scraping in {seconds} seconds')
-    print(f'{len(root_urls)} repositories scanned')
+    print(f'{len(repo_root_urls)} repositories scanned')
 
 def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
 
@@ -142,27 +149,29 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
     temp_source_codes = []
     for repo in scraped_file_urls:
         for file in repo:
+            time.sleep(0.5)
             single_file_html = requests.get(file, stream=True).text
             soup = BeautifulSoup(single_file_html, features='html.parser')
             lines = soup.find_all('td', class_="blob-code blob-code-inner js-file-line")
-            src = ''
-            for line in lines:
-                if line.text != '':
-                    src += line.text
-                else: continue
-            # for line in lines:
-            #     if filter_src_line(line, code_lang):
-            #         l = line.text.replace('\n', ' ')
-            #         src += line.text
-            #     else:
-            #         continue
-            temp_source_codes.append(src)
 
+            if len(lines) > 0:
+                src = ''
+                for line in lines:
+                    if line.text != '' or line.text != ' ':
+                        src += line.text
+                    else: continue
+                # for line in lines:
+                #     if filter_src_line(line, code_lang):
+                #         l = line.text.replace('\n', ' ')
+                #         src += line.text
+                #     else:
+                #         continue
+                temp_source_codes.append(src)
+            else: continue
+
+    source_codes.extend(get_src_by_num_of_tokens(temp_source_codes, num_tokens, extract_backwards))
     
-    limited_source_codes = get_src_by_num_of_tokens(temp_source_codes, num_tokens, True)
-    
-    print("Files: ", len(limited_source_codes))
-    print(limited_source_codes)
+    print(f'{len(source_codes)} files found')
 
 def filter_src_line(line, code_lang):
 
@@ -179,21 +188,42 @@ def get_src_by_num_of_tokens(temp_src, num_tokens, backwards):
 
     result = []
     for content in temp_src:
-        num_lines = len(content)
-        if num_tokens >= num_lines:
+        content_space_separated = content.split()
+        num_token_seq = len(content_space_separated)
+        # Consider only whole tokens when slicing
+        if num_tokens >= num_token_seq:
             result.append(content)
         
-        if num_tokens < num_lines and not backwards:
-            result.append(content[0:num_tokens])
+        if num_tokens < num_token_seq and not backwards:
+            file_content = ''
+            for token in content_space_separated[0:num_tokens]:
+                file_content += token + ' '
+            result.append(file_content)
         else:
-            result.append(content[-num_tokens:])
+            file_content = ''
+            for token in content_space_separated[-num_tokens:]:
+                file_content += token + ' '
+            result.append(file_content)
 
     return result
 
-def send_code_for_annotation():
-    pass
+def send_code_for_annotation(code_lang):
+    print("Sending source codes to Annotation API...")
 
+    batch_length = len(source_codes)
+    try:
+        for i in range(batch_length):
+            res = requests.post(annotation_api_url, json={
+                "codeLanguage": code_lang,
+                "sourceCode": source_codes[i]
+                })
+            print(f"Sending file {i + 1}/{batch_length} with status code: {res.status_code}")
+
+        print("Annotated files successfully!")
+    except Exception as e:
+        print(e)
 
 if __name__ == '__main__':
-    scrape(sys.argv[1])
-    extract_source_code_from_file(sys.argv[1], int(sys.argv[2]), bool(sys.argv[3]))
+    scrape(sys.argv[1], int(sys.argv[2]))
+    extract_source_code_from_file(sys.argv[1], int(sys.argv[3]), bool(sys.argv[4]))
+    send_code_for_annotation(sys.argv[1])
