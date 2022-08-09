@@ -10,7 +10,6 @@ python_trending_repos = 'https://github.com/trending/python?since=daily'
 java_trending_repos = 'https://github.com/trending/java?since=daily'
 kotlin_trending_repos = 'https://github.com/trending/kotlin?since=daily'
 
-annotation_api_url_local = 'http://localhost:8081/api/v1/highlight'
 annotation_api_url = 'http://syntax-highlighting-service-rest-api:8081/api/v1/highlight'
 
 python_file_ex = '.py'
@@ -146,6 +145,7 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
     timeout = 10
     print(f'Waiting {timeout} seconds to avoid abuse timeout')
     time.sleep(timeout)
+    print("Extracting code from files...")
     temp_source_codes = []
     for repo in scraped_file_urls:
         for file in repo:

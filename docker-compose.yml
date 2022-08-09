@@ -79,6 +79,15 @@ services:
     restart: always
     networks:
       - backend
+  github-scraper:
+    container_name: syntax-highlighting-service-github-scraper
+    build: ./github-scraper
+    image: benlegiang/syntax-highlighting-service-github-scraper:master
+    depends_on:
+      - rest-api
+    restart: never
+    networks:
+      - backend
 volumes:
   db-data:
 networks:
