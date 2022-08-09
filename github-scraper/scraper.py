@@ -100,6 +100,9 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0,
 
 def get_root_urls(code_lang):
 
+    repos = None
+    code_lang_extension = None
+
     if code_lang == 'PYTHON3':
         repos = get_trending_repo_urls(python_trending_repos)
         code_lang_extension = python_file_ex
