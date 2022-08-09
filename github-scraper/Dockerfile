@@ -12,5 +12,5 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Replace arguments with environment variables
-CMD ["python3", "scraper.py", "8", "400", "True"]
+CMD ["python3", "scraper.py", "PYTHON3", "8", "400", "True"]
 
