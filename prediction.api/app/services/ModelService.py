@@ -4,8 +4,8 @@ from pymongo import MongoClient
 from app.utils.SHModelUtils import SHModel
 
 
-mongoUri = 'mongodb://admin:admin@localhost:27017'
-# mongoUri = MongoClient('mongodb://admin:admin@mongodb:27017')
+# mongo_uri = 'mongodb://admin:admin@localhost:27017'
+mongo_uri = MongoClient('mongodb://admin:admin@mongodb:27017')
 
 database = 'syntaxHighlighting'
 
@@ -14,7 +14,7 @@ def load_model_from_db(model_name, model_lang: str) -> SHModel:
     try:
         json_data = {}
 
-        client = MongoClient(mongoUri)
+        client = MongoClient(mongo_uri)
 
         db = client[database]
 
