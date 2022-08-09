@@ -27,6 +27,8 @@ services:
     image: benlegiang/syntax-highlighting-service-prediction-api:master
     ports:
       - $PREDICTION_API_HOST_PORT:8000
+    depends_on:
+      - mongodb
     deploy:
       resources:
         limits:
@@ -40,6 +42,8 @@ services:
     image: benlegiang/syntax-highlighting-service-training-api:master
     ports:
       - 8001:8001
+    depends_on:
+      - mongodb
     deploy:
       resources:
         limits:
