@@ -19,7 +19,7 @@ public interface AnnotationMapper {
 
     @Mapping(target = "codeLanguage")
     @Mapping(target = "sourceCode")
-    @Mapping(target = "HCodeValues")
-    @Mapping(target = "predictedHCodeValues")
+    @Mapping(target = "formal")
+    @Mapping(target = "prediction")
     AnnotationGetDTO convertAnnotationEntityToGetDTO(AnnotationEntity annotationEntity);
 }

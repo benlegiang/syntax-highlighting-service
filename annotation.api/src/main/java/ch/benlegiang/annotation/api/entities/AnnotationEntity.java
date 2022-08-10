@@ -12,8 +12,8 @@ public class AnnotationEntity {
     @Id
     public String id;
     public CodeLanguage codeLanguage;
-    private String sourceCode;
-    private List<Integer> tokenIds;
-    private List<Integer> hCodeValues;
-    private List<Integer> predictedHCodeValues;
+    public String sourceCode;
+    public List<Integer> tokenIds;
+    public List<Integer> formal;
+    public List<Integer> prediction;
 }

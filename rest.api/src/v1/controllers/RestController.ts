@@ -20,6 +20,6 @@ export class RestController {
       });
     });
 
-    // Add additional endpoints here if needed
+    // Add additional routes in this function if needed
   }
 }

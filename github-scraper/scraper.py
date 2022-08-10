@@ -10,7 +10,8 @@ python_trending_repos = 'https://github.com/trending/python?since=daily'
 java_trending_repos = 'https://github.com/trending/java?since=daily'
 kotlin_trending_repos = 'https://github.com/trending/kotlin?since=daily'
 
-annotation_api_url = 'http://syntax-highlighting-service-rest-api:8081/api/v1/highlight'
+# annotation_api_url = 'http://syntax-highlighting-service-rest-api:8081/api/v1/highlight'
+annotation_api_url = 'http://localhost:8081/api/v1/highlight'
 
 python_file_ex = '.py'
 java_file_ex = '.java'
@@ -149,7 +150,7 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
     temp_source_codes = []
     for repo in scraped_file_urls:
         for file in repo:
-            time.sleep(0.5)
+            time.sleep(0.2)
             single_file_html = requests.get(file, stream=True).text
             soup = BeautifulSoup(single_file_html, features='html.parser')
             lines = soup.find_all('td', class_="blob-code blob-code-inner js-file-line")
@@ -158,7 +159,7 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
                 src = ''
                 for line in lines:
                     if line.text != '' or line.text != ' ':
-                        src += line.text
+                        src += line.text + '\n '
                     else: continue
                 # for line in lines:
                 #     if filter_src_line(line, code_lang):
@@ -168,7 +169,6 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
                 #         continue
                 temp_source_codes.append(src)
             else: continue
-
     source_codes.extend(get_src_by_num_of_tokens(temp_source_codes, num_tokens, extract_backwards))
     
     print(f'{len(source_codes)} files found')
@@ -184,6 +184,7 @@ def filter_src_line(line, code_lang):
 
     # Check other languages for comments
 
+# Limit the number of tokens from source code
 def get_src_by_num_of_tokens(temp_src, num_tokens, backwards):
 
     result = []
@@ -204,6 +205,7 @@ def get_src_by_num_of_tokens(temp_src, num_tokens, backwards):
             for token in content_space_separated[-num_tokens:]:
                 file_content += token + ' '
             result.append(file_content)
+
 
     return result
 

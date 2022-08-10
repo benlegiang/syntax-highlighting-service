@@ -8,9 +8,13 @@ import ch.benlegiang.annotation.api.mappers.AnnotationMapper;
 import ch.benlegiang.annotation.api.services.AnnotationService;
 import ch.benlegiang.annotation.api.services.PredictionService;
 import ch.benlegiang.annotation.api.utils.AnnotationUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import resolver.Python3Resolver;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,30 +35,27 @@ public class AnnotationController {
     @PostMapping(path = "/annotate")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public AnnotationGetDTO annotate(@RequestBody AnnotationPostDTO annotationPostDto) {
+    public AnnotationGetDTO annotate(@RequestBody AnnotationPostDTO annotationPostDto) throws IOException {
         AnnotationEntity annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToAnnotationEntitiy(annotationPostDto);
 
         List<Integer> tokenIds = AnnotationUtil.lexSourceCode(annotationEntity);
         List<Integer> hCodeValues = AnnotationUtil.highlightSourceCode(annotationEntity);
-        annotationEntity.setTokenIds(tokenIds);
-        annotationEntity.setHCodeValues(hCodeValues);
 
+        Integer diff = tokenIds.size() - hCodeValues.size();
+        System.out.println(diff);
+
+        annotationEntity.setTokenIds(tokenIds);
+        annotationEntity.setFormal(hCodeValues);
+
+        // Send tokenIds for prediction and set it on Entity object
+        predictionService.setPrediction(annotationEntity);
+
+        // Save Entity to Mongo DB
         annotationService.addAnnotationEntityToDatabase(annotationEntity);
-        predictionService.predict();
+
 
         AnnotationGetDTO annotationGetDTO = AnnotationMapper.INSTANCE.convertAnnotationEntityToGetDTO(annotationEntity);
         return annotationGetDTO;
     }
 
-    @GetMapping(path = "/annotations/{language}")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<AnnotationEntity> getAnnotations(@PathVariable String language) {
-
-        CodeLanguage codeLanguage = CodeLanguage.valueOf(language);
-
-        List<AnnotationEntity> annotationEntities = annotationService.getAnnotationsByCodeLanguage(codeLanguage);
-
-        return annotationEntities;
-    }
 }

@@ -5,30 +5,24 @@ from app.services.ModelService import *
 app = Flask(__name__)
 
 def load_python_model():
-    python_model: SHModel = load_model_from_db('test', 'python3')
-    print('Loading model sucessfully')
-    # python_model.setup_for_prediction()
-    python_model.setup_for_finetuning()
-    print('Setting up model for prediction')
+    python_model: SHModel = load_model_from_db('latest', 'PYTHON3')
+    python_model.setup_for_prediction()
     return python_model
 
-# UNCOMMENT WHILE THERE IS NO SUCH MODEL ON THE DATABASE
-# def load_java_model():
-#     java_model: SHModel = load_model_from_db('test', 'java')
-#     java_model.setup_for_prediction()
+def load_java_model():
+    java_model: SHModel = load_model_from_db('latest', 'JAVA')
+    java_model.setup_for_prediction()
+    return java_model
 
-#     return java_model
+def load_kotlin_model():
+    kotlin_model: SHModel = load_model_from_db('latest', 'KOTLIN')
+    kotlin_model.setup_for_prediction()
+    return kotlin_model
 
-# def load_kotlin_model():
-#     kotlin: SHModel = load_model_from_db('test', 'kotlin')
-#     kotlin_model.setup_for_prediction()
-
-#     return kotlin_model
-
+# Loading models for supported languages
 python_model = load_python_model()
-
-# java_model = load_java_model()
-# kotlin_model = load_kotlin_model()
+java_model = load_java_model()
+kotlin_model = load_kotlin_model()
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -44,22 +38,18 @@ def predict():
         requestBody = request.json
         codeLanguage = requestBody['codeLanguage']
         tokenIds = requestBody['tokenIds']
-        hCodeValues = requestBody['hCodeValues']
 
         if codeLanguage == 'PYTHON3':
-            # prediction = python_model.predict(tokenIds)
-            loss = python_model.finetune_on(tokenIds, hCodeValues)
-            # return jsonify(hCodes = prediction)
-            return jsonify(loss = loss)
+            prediction = python_model.predict(tokenIds)
+            return jsonify(prediction = prediction)
 
         elif codeLanguage == 'JAVA':
             prediction = java_model.predict(tokenIds)
-
-            return jsonify(hCodes = prediction)
+            return jsonify(prediction = prediction)
 
         elif codeLanguage == 'KOTLIN':
             prediction = kotlin_model.predict(tokenIds)
-            return jsonify(hCodes = prediction)
+            return jsonify(prediction = prediction)
 
     else:
         return 'Content-Type is not supported!'

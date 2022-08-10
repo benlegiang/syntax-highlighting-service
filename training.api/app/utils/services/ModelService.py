@@ -5,8 +5,8 @@ from datetime import datetime
 
 from app.utils.SHModelUtils import SHModel
 
-# mongo_uri = 'mongodb://admin:admin@localhost:27017'
-mongo_uri = MongoClient('mongodb://admin:admin@mongodb:27017')
+mongo_uri = 'mongodb://admin:admin@localhost:27017'
+# mongo_uri = MongoClient('mongodb://admin:admin@mongodb:27017')
 database = 'syntaxHighlighting'
 annotations_collection = 'annotations'
 batch_size = 1000
@@ -24,8 +24,6 @@ def save_model_to_db(model_name: str, model: SHModel, model_lang: str):
         collection = db[model_lang]
 
         query = collection.insert_one({"model_name": model_name, "model_data": pickled_model, "created_at": datetime.now().isoformat()})
-
-        # print(response.inserted_id, ' saved successfully')
     
         details = {'inserted_id': query.inserted_id, "created_at": datetime.now().isoformat()}
 

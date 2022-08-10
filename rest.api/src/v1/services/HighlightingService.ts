@@ -4,7 +4,7 @@ import axios from "axios";
 interface HighlightingResult {
   codeLanguage: String;
   sourceCode: String;
-  hCodes: number[];
+  prediction: number[];
 }
 
 export class HighlightingService {

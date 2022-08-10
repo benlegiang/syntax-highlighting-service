@@ -25,14 +25,4 @@ public class AnnotationService {
         annotationRepository.save(annotationEntity);
     }
 
-    public List<AnnotationEntity> getAnnotationsByCodeLanguage(CodeLanguage codeLanguage) {
-        Query query = new Query();
-
-        query.addCriteria(Criteria.where("codeLanguage").is("JAVA"));
-        List<AnnotationEntity> annotationEntities = mongoTemplate.find(query, AnnotationEntity.class);
-
-        return annotationEntities;
-    }
-
-
 }
