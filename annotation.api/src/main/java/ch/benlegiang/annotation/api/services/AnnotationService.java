@@ -19,7 +19,6 @@ import java.util.List;
 public class AnnotationService {
 
     private final AnnotationRepository annotationRepository;
-    private final MongoTemplate mongoTemplate;
 
     public void addAnnotationEntityToDatabase(AnnotationEntity annotationEntity) {
         annotationRepository.save(annotationEntity);

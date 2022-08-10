@@ -1,6 +1,5 @@
 from datetime import datetime
 import pickle
-from pymongo import MongoClient
 from app.services.MongoDatabase import MongoDatabase
 
 from app.utils.SHModelUtils import JAVA_LANG_NAME, KOTLIN_LANG_NAME, PYTHON3_LANG_NAME, SHModel

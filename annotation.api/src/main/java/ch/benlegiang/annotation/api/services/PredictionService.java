@@ -24,8 +24,8 @@ public class PredictionService {
 
 
     public PredictionService(WebClient.Builder webClientBuilder) {
-        // this.webClient = webClientBuilder.baseUrl("http://syntax-highlighting-service-prediction-api:8000").build();
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+        this.webClient = webClientBuilder.baseUrl("http://syntax-highlighting-service-prediction-api:8000").build();
+        // this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
 
     }
 

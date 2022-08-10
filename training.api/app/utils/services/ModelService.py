@@ -1,12 +1,10 @@
 # Save model
-from pymongo import MongoClient
 import pickle
 from datetime import datetime
 
 from app.utils.SHModelUtils import SHModel
+from app.utils.services.MongoDatabase import MongoDatabase
 
-mongo_uri = 'mongodb://admin:admin@localhost:27017'
-# mongo_uri = MongoClient('mongodb://admin:admin@mongodb:27017')
 database = 'syntaxHighlighting'
 annotations_collection = 'annotations'
 batch_size = 1000
@@ -14,7 +12,7 @@ training_size = 0.8
 test_size = 0.2
 
 def save_model_to_db(model_name: str, model: SHModel, model_lang: str):
-    client = MongoClient(mongo_uri)
+    client = MongoDatabase().client
 
     model.persist_model()
     try:
@@ -34,7 +32,7 @@ def save_model_to_db(model_name: str, model: SHModel, model_lang: str):
 
 def load_annotations_from_db(code_lang):
 
-    client = MongoClient(mongo_uri)
+    client = MongoDatabase().client
 
     try:
         db = client[database]
