@@ -49,7 +49,7 @@ jobs:
         host: ${{secrets.UBUNTU_VM_HOST}}
         username: ${{secrets.UBUNTU_VM_USER}}
         key: ${{secrets.UBUNTU_VM_SECRET}}
-        port: 22
+        port: ${{secrets.UBUNTU_VM_PORT}}
         script: |
           docker login --username benlegiang --password-stdin < docker_pwd.txt
           cd syntax-highlighting-service
