@@ -41,10 +41,12 @@ public class AnnotationUtil {
     public static List<Integer> highlightSourceCode(AnnotationEntity annotationEntity) {
         HTok[] hToks = AnnotationUtil.highlight(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
         List<Integer> hCodeValues = new ArrayList<>();
-        for (HTok hTok : hToks) {
-            hCodeValues.add(hTok.hCodeValue);
+
+        for (int i = 0; i <= hToks.length - 2; i++) {
+            hCodeValues.add(hToks[i].hCodeValue);
         }
         return hCodeValues;
+
     }
 
     public static Resolver getResolverByLang(CodeLanguage lang) {
