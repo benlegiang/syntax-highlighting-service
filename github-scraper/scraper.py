@@ -3,6 +3,7 @@ import time
 from bs4 import BeautifulSoup
 import requests
 import sys
+import re
 
 github = 'https://github.com/'
 
@@ -97,7 +98,7 @@ def get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration=0,
             code_file_urls.extend(c_urls)
 
         get_code_file_urls_from_repo_url(code_lang_extension, root_url, iteration + 1, sub_dir_urls_from_dir, code_file_urls)
-    time.sleep(1)
+    time.sleep(0.5)
 
 def get_root_urls(code_lang):
 
@@ -124,7 +125,8 @@ def scrape(code_lang, repo_limit):
     threads = []
 
     repo_root_urls = root_urls[0:repo_limit]
-    
+
+    # test = ['https://github.com/benlegiang/syntax-highlighting-service/tree/master/prediction.api']
 
     for url in repo_root_urls:
         process = Thread(target=get_code_file_urls_from_repo_url, args=(code_lang_extension, 
@@ -148,30 +150,36 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
     time.sleep(timeout)
     print("Extracting code from files...")
     temp_source_codes = []
-    for repo in scraped_file_urls:
-        for file in repo:
-            time.sleep(0.2)
-            single_file_html = requests.get(file, stream=True).text
-            soup = BeautifulSoup(single_file_html, features='html.parser')
-            lines = soup.find_all('td', class_="blob-code blob-code-inner js-file-line")
 
-            if len(lines) > 0:
-                src = ''
-                for line in lines:
-                    if line.text != '' or line.text != ' ':
-                        src += line.text + '\n '
-                    else: continue
-                # for line in lines:
-                #     if filter_src_line(line, code_lang):
-                #         l = line.text.replace('\n', ' ')
-                #         src += line.text
-                #     else:
-                #         continue
-                temp_source_codes.append(src)
-            else: continue
+    # Scraping must be handled slightly differently for each code language (e.g. Python with identation)
+    if code_lang == 'PYTHON3':
+        for repo in scraped_file_urls:
+            for file in repo:
+                time.sleep(0.2)
+                single_file_html = requests.get(file, stream=True).text
+                soup = BeautifulSoup(single_file_html, features='html.parser')
+                lines = soup.find_all('td', class_="blob-code blob-code-inner js-file-line")
+
+                if len(lines) > 0:
+                    src = ''
+                    for line in lines:
+                        if line.text and '#' not in line.text and len(line.text) > 1:
+                            if line.text[-1] == ':':
+                                src += line.text + '\\n\\t'
+                            else:
+                                src += line.text + '\\n'
+                        else: continue
+                    temp_source_codes.append(src)
+                else: continue
+
+    # TODO: Extend this for java and kotlin
+    if code_lang == 'JAVA':
+        pass
+
+    if code_lang == 'KOTLIN':
+        pass
+
     source_codes.extend(get_src_by_num_of_tokens(temp_source_codes, num_tokens, extract_backwards))
-    
-    print(f'{len(source_codes)} files found')
 
 def filter_src_line(line, code_lang):
 
@@ -194,16 +202,21 @@ def get_src_by_num_of_tokens(temp_src, num_tokens, backwards):
         # Consider only whole tokens when slicing
         if num_tokens >= num_token_seq:
             result.append(content)
-        
         if num_tokens < num_token_seq and not backwards:
             file_content = ''
             for token in content_space_separated[0:num_tokens]:
-                file_content += token + ' '
+                if "\\n" in token or "\\n\\t" in token:
+                    file_content += token
+                else:
+                    file_content += token + ' '
             result.append(file_content)
         else:
             file_content = ''
             for token in content_space_separated[-num_tokens:]:
-                file_content += token + ' '
+                if "\\n" in token or "\\n\\t" in token:
+                    file_content += token
+                else:
+                    file_content += token + ' '
             result.append(file_content)
 
 
@@ -217,13 +230,20 @@ def send_code_for_annotation(code_lang):
         for i in range(batch_length):
             res = requests.post(annotation_api_url, json={
                 "codeLanguage": code_lang,
-                "sourceCode": source_codes[i]
+                "sourceCode": remove_multi_line_comments(source_codes[i])
                 })
             print(f"Sending file {i + 1}/{batch_length} with status code: {res.status_code}")
 
         print("Annotated files successfully!")
     except Exception as e:
         print(e)
+
+def remove_multi_line_comments(source_code):
+    delimiters = "'''"
+    reg_exp = "[" + delimiters + "].*[" + delimiters + "]"
+    with_comments = re.sub(reg_exp, "", source_code)
+
+    return with_comments
 
 if __name__ == '__main__':
     scrape(sys.argv[1], int(sys.argv[2]))
