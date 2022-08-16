@@ -12,8 +12,13 @@ public class AnnotationService {
 
     private final AnnotationRepository annotationRepository;
 
-    public void addAnnotationEntityToDatabase(AnnotationEntity annotationEntity) {
+    public void saveAnnotationEntityToDatabase(AnnotationEntity annotationEntity) {
         annotationRepository.save(annotationEntity);
+    }
+
+    public void setFormalTokenIdsOnDatabaseObject() {
+
+
     }
 
     public void setHCodeValues() {

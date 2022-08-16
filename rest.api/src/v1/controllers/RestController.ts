@@ -14,18 +14,6 @@ export class RestController {
   }
 
   private mountRoutes(): void {
-    // this.router.use("/", (req, res, next) => {
-    //   res.header(
-    //     "Access-Control-Allow-Headers",
-    //     "Access-Control-Allow-Headers, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept, Sentry-Trace"
-    //   );
-    //   if (req.method === "OPTIONS") {
-    //     res.sendStatus(200);
-    //   } else {
-    //     next();
-    //   }
-    // });
-
     // Entry endpoint for micro services
     this.router.post("/highlight", (req, res) => {
       const scope = Sentry.getCurrentHub().getScope();
@@ -36,7 +24,6 @@ export class RestController {
         .execute(req)
         .then((result) => {
           scope.getTransaction().finish();
-          console.log("FINISHED EXECUTING");
           res.json(result);
         })
         .catch((e) => {

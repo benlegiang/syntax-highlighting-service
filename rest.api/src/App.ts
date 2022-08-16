@@ -16,6 +16,7 @@ class App {
     this.express.use(this.compression());
 
     Sentry.init({
+      environment: "PROD",
       dsn: "https://b2a73205682f49299647b69434915dbe@o1173927.ingest.sentry.io/6652790",
       integrations: [
         // enable HTTP calls tracing
