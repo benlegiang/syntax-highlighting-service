@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 
 from app.utils.SHModelUtils import *
-from .utils.services.ModelService import deploy_new_model, fine_tune_model, save_model_to_db
+from app.utils.services.ModelService import deploy_new_model
 
 app = Flask(__name__)
 
