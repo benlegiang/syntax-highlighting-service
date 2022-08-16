@@ -2,6 +2,7 @@ package ch.benlegiang.annotation.api.controllers;
 
 import ch.benlegiang.annotation.api.dtos.AnnotationGetDTO;
 import ch.benlegiang.annotation.api.dtos.AnnotationPostDTO;
+import ch.benlegiang.annotation.api.dtos.ParserPostDTO;
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
 import ch.benlegiang.annotation.api.enums.CodeLanguage;
 import ch.benlegiang.annotation.api.mappers.AnnotationMapper;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import resolver.Python3Resolver;
 
+import javax.swing.text.html.parser.Parser;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,23 +31,15 @@ public class AnnotationController {
         this.predictionService = predictionService;
     }
 
-    // For now, this endpoint returns the hCodeValues from the AST
-    // hCodeValues from AST is stored on DB for fine-tuning
-    // TODO: Needs to return the hCodeValues from the SHModel
-    @PostMapping(path = "/annotate")
+    @PostMapping(path = "/highlight")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public AnnotationGetDTO annotate(@RequestBody AnnotationPostDTO annotationPostDto) throws IOException {
-        AnnotationEntity annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToAnnotationEntitiy(annotationPostDto);
+    public AnnotationGetDTO highlight(@RequestBody AnnotationPostDTO annotationPostDto) throws IOException {
+        AnnotationEntity annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToAnnotationEntity(annotationPostDto);
 
         List<Integer> tokenIds = AnnotationUtil.lexSourceCode(annotationEntity);
-        List<Integer> hCodeValues = AnnotationUtil.highlightSourceCode(annotationEntity);
-
-        Integer diff = tokenIds.size() - hCodeValues.size();
-        System.out.println(diff);
 
         annotationEntity.setTokenIds(tokenIds);
-        annotationEntity.setFormal(hCodeValues);
 
         // Send tokenIds for prediction and set it on Entity object
         predictionService.setPrediction(annotationEntity);
@@ -53,9 +47,17 @@ public class AnnotationController {
         // Save Entity to Mongo DB
         annotationService.addAnnotationEntityToDatabase(annotationEntity);
 
-
         AnnotationGetDTO annotationGetDTO = AnnotationMapper.INSTANCE.convertAnnotationEntityToGetDTO(annotationEntity);
         return annotationGetDTO;
     }
 
+    @PostMapping(path= "/parse")
+    @ResponseStatus(HttpStatus.OK)
+    public void parse(@RequestBody ParserPostDTO parserPostDTO) {
+
+        List<Integer> hCodeValues = AnnotationUtil.highlightSourceCode(parserPostDTO);
+
+        System.out.println(hCodeValues);
+
+    }
 }

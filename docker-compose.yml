@@ -87,6 +87,7 @@ services:
     container_name: syntax-highlighting-service-github-scraper
     build: ./github-scraper
     image: benlegiang/syntax-highlighting-service-github-scraper:master
+    profiles: ["scraper"]
     depends_on:
       - rest-api
     networks:
