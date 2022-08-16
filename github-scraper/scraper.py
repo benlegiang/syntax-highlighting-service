@@ -1,5 +1,6 @@
 from threading import *
 import time
+from xmlrpc.client import boolean
 from bs4 import BeautifulSoup
 import requests
 import sys
@@ -143,7 +144,7 @@ def scrape(code_lang, repo_limit):
     print(f'Finished scraping in {seconds} seconds')
     print(f'{len(repo_root_urls)} repositories scanned')
 
-def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
+def extract_source_code_from_file(code_lang, extract_backwards):
 
     timeout = 10
     print(f'Waiting {timeout} seconds to avoid abuse timeout')
@@ -165,9 +166,9 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
                     for line in lines:
                         if line.text and '#' not in line.text and len(line.text) > 1:
                             if line.text[-1] == ':':
-                                src += line.text + '\\n\\t'
+                                src += line.text + '\n\t'
                             else:
-                                src += line.text + '\\n'
+                                src += line.text + '\n'
                         else: continue
                     temp_source_codes.append(src)
                 else: continue
@@ -179,7 +180,7 @@ def extract_source_code_from_file(code_lang, num_tokens, extract_backwards):
     if code_lang == 'KOTLIN':
         pass
 
-    source_codes.extend(get_src_by_num_of_tokens(temp_source_codes, num_tokens, extract_backwards))
+    source_codes.extend(temp_source_codes)
 
 def filter_src_line(line, code_lang):
 
@@ -192,35 +193,6 @@ def filter_src_line(line, code_lang):
 
     # Check other languages for comments
 
-# Limit the number of tokens from source code
-def get_src_by_num_of_tokens(temp_src, num_tokens, backwards):
-
-    result = []
-    for content in temp_src:
-        content_space_separated = content.split()
-        num_token_seq = len(content_space_separated)
-        # Consider only whole tokens when slicing
-        if num_tokens >= num_token_seq:
-            result.append(content)
-        if num_tokens < num_token_seq and not backwards:
-            file_content = ''
-            for token in content_space_separated[0:num_tokens]:
-                if "\\n" in token or "\\n\\t" in token:
-                    file_content += token
-                else:
-                    file_content += token + ' '
-            result.append(file_content)
-        else:
-            file_content = ''
-            for token in content_space_separated[-num_tokens:]:
-                if "\\n" in token or "\\n\\t" in token:
-                    file_content += token
-                else:
-                    file_content += token + ' '
-            result.append(file_content)
-
-
-    return result
 
 def send_code_for_annotation(code_lang):
     print("Sending source codes to Annotation API...")
@@ -230,7 +202,7 @@ def send_code_for_annotation(code_lang):
         for i in range(batch_length):
             res = requests.post(annotation_api_url, json={
                 "codeLanguage": code_lang,
-                "sourceCode": remove_multi_line_comments(source_codes[i])
+                "sourceCode": source_codes[i]
                 })
             print(f"Sending file {i + 1}/{batch_length} with status code: {res.status_code}")
 
@@ -238,14 +210,14 @@ def send_code_for_annotation(code_lang):
     except Exception as e:
         print(e)
 
-def remove_multi_line_comments(source_code):
-    delimiters = "'''"
-    reg_exp = "[" + delimiters + "].*[" + delimiters + "]"
-    with_comments = re.sub(reg_exp, "", source_code)
+# def remove_multi_line_comments(source_code):
+#     delimiters = "'''"
+#     reg_exp = "[" + delimiters + "].*[" + delimiters + "]"
+#     with_comments = re.sub(reg_exp, "", source_code)
 
-    return with_comments
+#     return with_comments
 
 if __name__ == '__main__':
     scrape(sys.argv[1], int(sys.argv[2]))
-    extract_source_code_from_file(sys.argv[1], int(sys.argv[3]), bool(sys.argv[4]))
+    extract_source_code_from_file(sys.argv[1], bool(sys.argv[3]))
     send_code_for_annotation(sys.argv[1])

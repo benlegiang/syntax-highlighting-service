@@ -15,11 +15,12 @@ public interface AnnotationMapper {
 
     @Mapping(source = "codeLanguage", target = "codeLanguage")
     @Mapping(source = "sourceCode", target = "sourceCode")
-    AnnotationEntity convertAnnotationPostDTOToAnnotationEntitiy(AnnotationPostDTO annotationPostDTO);
+    AnnotationEntity convertAnnotationPostDTOToAnnotationEntity(AnnotationPostDTO annotationPostDTO);
 
+    @Mapping(target = "id")
     @Mapping(target = "codeLanguage")
     @Mapping(target = "sourceCode")
-    @Mapping(target = "formal")
     @Mapping(target = "prediction")
     AnnotationGetDTO convertAnnotationEntityToGetDTO(AnnotationEntity annotationEntity);
+
 }

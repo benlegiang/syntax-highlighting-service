@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
 
 from app.utils.SHModelUtils import *
-from app.utils.services.ModelService import load_annotations_from_db
+from .utils.services.ModelService import deploy_new_model, fine_tune_model, save_model_to_db
 
 app = Flask(__name__)
-
 
 
 def setup_python_model():
@@ -24,10 +23,12 @@ def setup_kotlin_model():
 
     return kotlin_model
 
-python_model = setup_python_model()
-java_model = setup_java_model()
-kotlin_model = setup_kotlin_model()
+# Init a new model when you want to train a new model
+python_model: SHModel = setup_python_model()
+java_model: SHModel = setup_java_model()
+kotlin_model: SHModel = setup_kotlin_model()
 
+deploy_new_model('latest', python_model, 'PYTHON3')
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -46,8 +47,7 @@ def train():
 
         if code_language == 'PYTHON3':
             loss = python_model.finetune_on(token_ids, h_code_values)
-            count = load_annotations_from_db('JAVA')
-            return jsonify(l = loss, annotationCount = count)
+            return jsonify(l = loss)
 
         elif code_language == 'JAVA':
             loss = java_model.finetune_on(token_ids, h_code_values)

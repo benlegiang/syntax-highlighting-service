@@ -1,5 +1,8 @@
 import express from "express";
 import { RestController } from "./v1/controllers/RestController";
+import * as Sentry from "@sentry/node";
+import { RewriteFrames } from "@sentry/integrations";
+const Tracing = require("@sentry/tracing");
 
 class App {
   public express: express.Express;
@@ -11,7 +14,27 @@ class App {
     this.express.use(express.json());
     // Uses compression for all HTTP responses
     this.express.use(this.compression());
+
+    Sentry.init({
+      dsn: "https://b2a73205682f49299647b69434915dbe@o1173927.ingest.sentry.io/6652790",
+      integrations: [
+        // enable HTTP calls tracing
+        new Sentry.Integrations.Http({ tracing: true }),
+        // enable Express.js middleware tracing
+        new Tracing.Integrations.Express({ express }),
+        new RewriteFrames({
+          root: process.cwd(),
+        }) as any,
+      ],
+      tracesSampleRate: 1.0,
+    });
+
+    this.express.use(Sentry.Handlers.requestHandler());
+    this.express.use(Sentry.Handlers.tracingHandler());
+
     this.mountRoutes();
+
+    this.express.use(Sentry.Handlers.errorHandler());
   }
 
   private mountRoutes(): void {

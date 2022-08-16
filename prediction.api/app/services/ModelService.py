@@ -1,11 +1,9 @@
 from datetime import datetime
 import pickle
 from app.services.MongoDatabase import MongoDatabase
-
 from app.utils.SHModelUtils import JAVA_LANG_NAME, KOTLIN_LANG_NAME, PYTHON3_LANG_NAME, SHModel
 
 database = 'syntaxHighlighting'
-
 
 def check_if_model_exists(model_lang):
 

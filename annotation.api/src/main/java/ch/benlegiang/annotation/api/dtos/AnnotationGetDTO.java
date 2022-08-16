@@ -6,8 +6,8 @@ import java.util.List;
 
 @Data
 public class AnnotationGetDTO {
+    private String id;
     private String codeLanguage;
     private String sourceCode;
-    private List<Integer> formal;
     private List<Integer> prediction;
 }

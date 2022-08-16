@@ -1,5 +1,6 @@
 package ch.benlegiang.annotation.api.utils;
 
+import ch.benlegiang.annotation.api.dtos.ParserPostDTO;
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
 import ch.benlegiang.annotation.api.enums.CodeLanguage;
 import lexer.HTok;
@@ -9,6 +10,7 @@ import resolver.KotlinResolver;
 import resolver.Python3Resolver;
 import resolver.Resolver;
 
+import javax.swing.text.html.parser.Parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,9 +24,11 @@ public class AnnotationUtil {
         return lToks;
     }
 
-    public static HTok[] highlight(CodeLanguage codeLanguage, String sourceCode) {
+    public static HTok[] highlight(ParserPostDTO parserPostDTO) {
+        CodeLanguage codeLanguage = CodeLanguage.valueOf(parserPostDTO.getCodeLanguage());
+
         Resolver resolver = getResolverByLang(codeLanguage);
-        HTok[] hToks = resolver.highlight(sourceCode);
+        HTok[] hToks = resolver.highlight(parserPostDTO.getSourceCode());
         return hToks;
     }
 
@@ -38,15 +42,18 @@ public class AnnotationUtil {
         return tokenIds;
     }
 
-    public static List<Integer> highlightSourceCode(AnnotationEntity annotationEntity) {
-        HTok[] hToks = AnnotationUtil.highlight(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
+    public static List<Integer> highlightSourceCode(ParserPostDTO parserPostDTO) {
+        HTok[] hToks = AnnotationUtil.highlight(parserPostDTO);
         List<Integer> hCodeValues = new ArrayList<>();
 
-        for (int i = 0; i <= hToks.length - 2; i++) {
-            hCodeValues.add(hToks[i].hCodeValue);
+        if (hToks != null) {
+            if (hToks.length > 2) {
+                for (int i = 0; i <= hToks.length - 2; i++) {
+                    hCodeValues.add(hToks[i].hCodeValue);
+                }
+            }
         }
         return hCodeValues;
-
     }
 
     public static Resolver getResolverByLang(CodeLanguage lang) {
