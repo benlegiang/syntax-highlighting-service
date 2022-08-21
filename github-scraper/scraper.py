@@ -4,7 +4,7 @@ from xmlrpc.client import boolean
 from bs4 import BeautifulSoup
 import requests
 import sys
-import re
+import json
 
 github = 'https://github.com/'
 
@@ -14,6 +14,7 @@ kotlin_trending_repos = 'https://github.com/trending/kotlin?since=daily'
 
 # annotation_api_url = 'http://syntax-highlighting-service-rest-api:8081/api/v1/highlight'
 annotation_api_url = 'http://localhost:8081/api/v1/highlight'
+# annotation_api_url = 'http://benlegiang.ch:8081/api/v1/highlight'
 
 python_file_ex = '.py'
 java_file_ex = '.java'
@@ -144,7 +145,7 @@ def scrape(code_lang, repo_limit):
     print(f'Finished scraping in {seconds} seconds')
     print(f'{len(repo_root_urls)} repositories scanned')
 
-def extract_source_code_from_file(code_lang, extract_backwards):
+def extract_source_code_from_file(code_lang):
 
     timeout = 10
     print(f'Waiting {timeout} seconds to avoid abuse timeout')
@@ -170,7 +171,7 @@ def extract_source_code_from_file(code_lang, extract_backwards):
                             else:
                                 src += line.text + '\n'
                         else: continue
-                    temp_source_codes.append(src)
+                    temp_source_codes.append({'url': file, 'source': src})
                 else: continue
 
     # TODO: Extend this for java and kotlin
@@ -198,6 +199,7 @@ def send_code_for_annotation(code_lang):
     print("Sending source codes to Annotation API...")
 
     batch_length = len(source_codes)
+
     try:
         for i in range(batch_length):
             res = requests.post(annotation_api_url, json={
@@ -209,15 +211,30 @@ def send_code_for_annotation(code_lang):
         print("Annotated files successfully!")
     except Exception as e:
         print(e)
+        
+def annotateFiles(code_lang):
+    data = [json.loads(line) for line in open('data-python.jsonl', 'r')]
 
-# def remove_multi_line_comments(source_code):
-#     delimiters = "'''"
-#     reg_exp = "[" + delimiters + "].*[" + delimiters + "]"
-#     with_comments = re.sub(reg_exp, "", source_code)
+    dataset_length = len(data)
+    
+    for i in range(dataset_length):
+            try:
+                res = requests.post(annotation_api_url, json={
+                    "codeLanguage": code_lang,
+                    "sourceCode": data[i]['source']
+                    })
+                print(f"Sending file {i + 1}/{dataset_length} with status code: {res.status_code}")
 
-#     return with_comments
+            except Exception as e:
+                print(e)
+
+
+    print("Annotated files successfully!")
+
 
 if __name__ == '__main__':
-    scrape(sys.argv[1], int(sys.argv[2]))
-    extract_source_code_from_file(sys.argv[1], bool(sys.argv[3]))
-    send_code_for_annotation(sys.argv[1])
+    # scrape(sys.argv[1], int(sys.argv[2]))
+    # extract_source_code_from_file(sys.argv[1])
+    # send_code_for_annotation(sys.argv[1])
+    annotateFiles(sys.argv[1])
+    
