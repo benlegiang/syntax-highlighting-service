@@ -29,6 +29,7 @@ services:
       - $PREDICTION_API_HOST_PORT:8000
     depends_on:
       - mongodb
+      - training-api
     deploy:
       resources:
         limits:
