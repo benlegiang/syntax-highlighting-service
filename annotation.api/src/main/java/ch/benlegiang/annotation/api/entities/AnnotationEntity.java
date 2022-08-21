@@ -17,4 +17,5 @@ public class AnnotationEntity {
     public List<Integer> formal;
     public List<Integer> prediction;
     public Boolean isTrainable;
+    public Boolean isTestItem = false;
 }

@@ -45,7 +45,7 @@ public class AnnotationController {
         predictionService.setPrediction(annotationEntity);
 
         // Save Entity to Mongo DB
-        annotationService.addAnnotationEntityToDatabase(annotationEntity);
+        annotationService.insertAnnotationEntity(annotationEntity);
 
         AnnotationGetDTO annotationGetDTO = AnnotationMapper.INSTANCE.convertAnnotationEntityToGetDTO(annotationEntity);
         return annotationGetDTO;
@@ -55,9 +55,7 @@ public class AnnotationController {
     @ResponseStatus(HttpStatus.OK)
     public void parse(@RequestBody ParserPostDTO parserPostDTO) {
 
-        List<Integer> hCodeValues = AnnotationUtil.highlightSourceCode(parserPostDTO);
-
-        System.out.println(hCodeValues);
+        annotationService.setFormalHCodeValuesByIdOnDatabaseObject(parserPostDTO);
 
     }
 }
