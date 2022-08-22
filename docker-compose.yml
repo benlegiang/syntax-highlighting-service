@@ -13,11 +13,6 @@ services:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
       - 27017:27017
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
     networks:
       - backend
     restart: unless-stopped
@@ -30,11 +25,6 @@ services:
     depends_on:
       - mongodb
       - training-api
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
     networks:
       - backend 
   training-api:
@@ -45,11 +35,6 @@ services:
       - 8001:8001
     depends_on:
       - mongodb
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
     networks:
       - backend
   rest-api:
@@ -60,11 +45,6 @@ services:
       - $REST_API_HOST_PORT:8081
     depends_on:
       - annotation-api
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
     networks:
       - backend    
     restart: always
@@ -76,11 +56,6 @@ services:
       - mongodb
     ports:
       - 8080:8080
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: 1024M
     restart: always
     networks:
       - backend
