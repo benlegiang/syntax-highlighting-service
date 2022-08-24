@@ -6,14 +6,13 @@ import requests
 class ModelService:
 
     def __init__(self, database: str, training_api: str):
+        self.client = MongoDatabase().client
         self.database = database
         self.training_api = training_api
         # Loads for each language its model from the database stored as binary
-        self.python_model: SHModel = self.load_model_from_db(1, 'PYTHON3')
-        self.java_model: SHModel = self.load_model_from_db(1, 'JAVA')
-        self.kotlin_model: SHModel = self.load_model_from_db(1, 'KOTLIN')
-
-        self.setup_models_for_prediction()
+        self.python_model: SHModel = self.load_model_from_db('PYTHON3', self.get_latest_model_number('PYTHON3'))
+        self.java_model: SHModel = self.load_model_from_db('JAVA', self.get_latest_model_number('JAVA'))
+        self.kotlin_model: SHModel = self.load_model_from_db('KOTLIN', self.get_latest_model_number('KOTLIN'))
 
     def setup_models_for_prediction(self):
 
@@ -22,11 +21,19 @@ class ModelService:
         self.java_model.setup_for_prediction()
         self.kotlin_model.setup_for_prediction()
 
+    def pull_latest_model(self, model_lang: str, model_number: int):
+        if model_lang == 'PYTHON3':
+            self.python_model = self.load_model_from_db(model_lang, model_number)
+
+        elif model_lang == 'JAVA':
+            self.java_model = self.load_model_from_db(model_lang, model_number)
+        
+        elif model_lang == 'KOTLIN':
+            self.kotlin_model = self.load_model_from_db(model_lang, model_number)
+
     def check_if_model_exists(self, model_lang):
         try:
-            client = MongoDatabase().client
-            
-            db = client[self.database]
+            db = self.client[self.database]
 
             collection = db[model_lang]
 
@@ -37,62 +44,47 @@ class ModelService:
         except:
             print("Error: Unable to establish database connection")
 
+    def get_model_data(self, model_number: int, model_lang: str):
+        json_data = {}
+
+        db = self.client[self.database]
+        collection = db[model_lang]
+
+        document = collection.find({"modelNumber": model_number})
+        
+        for i in document:
+            json_data = i
+
+        pickled_model = json_data['modelData']
+
+        print(f'Success: Loaded model {model_number} for {model_lang}')
+        return pickle.loads(pickled_model)   
+
+    def get_latest_model_number(self, model_lang: str):
+        db = self.client[self.database]
+
+        collection = db[model_lang]
+
+        size = collection.count_documents({})
+
+        return size   
+
     # Returns a model
-    def load_model_from_db(self, model_number, model_lang: str) -> SHModel:
+    def load_model_from_db(self, model_lang: str, model_number: int) -> SHModel:
         try:
             if self.check_if_model_exists(model_lang):
-                json_data = {}
-
-                client = MongoDatabase().client
-
-                db = client[self.database]
-
-                collection = db[model_lang]
-
-                document = collection.find({"modelNumber": model_number})
-
-                for i in document:
-                    json_data = i
-                pickled_model = json_data['modelData']
-
-                print(f'Success: Loaded model for {model_lang} from DB')
-
-                return pickle.loads(pickled_model)
+                return self.get_model_data(model_number, model_lang)
 
             else:
-                # Make request to training.api for it to init train very first model and save it to DB
+                # Make request to training.api for it to init training of very first model and save it to DB
 
                 request = requests.post(self.training_api + f'?lang={model_lang}').json()
-                print(request)
 
                 if request['success'] == True and request['modelNumber']:
-                    try:
-                        json_data = {}
-
-                        client = MongoDatabase().client
-
-                        db = client[self.database]
-
-                        collection = db[model_lang]
-
-                        document = collection.find({"modelNumber": request['modelNumber']})
-                        print(document)
-
-                        for i in document:
-                            json_data = i
-                        pickled_model = json_data['modelData']
-
-                        print(f'Success: Loaded model for {model_lang} from DB')
-
-                        return pickle.loads(pickled_model)
-
-                    except:
-                        print(f'Error: {model_lang} model does not exist yet!')
-                        return None
+                    return self.get_model_data(model_number, model_lang)
 
         except Exception as e: 
             print(f'Error: Unable to load model - ', e)
             return None
-
 
 
