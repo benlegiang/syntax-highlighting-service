@@ -10,6 +10,7 @@ import ch.benlegiang.annotation.api.services.AnnotationService;
 import ch.benlegiang.annotation.api.services.PredictionService;
 import ch.benlegiang.annotation.api.utils.AnnotationUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lexer.LTok;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import resolver.Python3Resolver;
@@ -17,6 +18,7 @@ import resolver.Python3Resolver;
 import javax.swing.text.html.parser.Parser;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -37,8 +39,10 @@ public class AnnotationController {
     public AnnotationGetDTO highlight(@RequestBody AnnotationPostDTO annotationPostDto) throws IOException {
         AnnotationEntity annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToAnnotationEntity(annotationPostDto);
 
-        List<Integer> tokenIds = AnnotationUtil.lexSourceCode(annotationEntity);
+        LTok[] lToks = AnnotationUtil.lexSourceCode(annotationEntity);
+        List<Integer> tokenIds = AnnotationUtil.getTokenIdsFromLToks(lToks);
 
+        annotationEntity.setTokens(lToks);
         annotationEntity.setTokenIds(tokenIds);
 
         // Send tokenIds for prediction and set it on Entity object

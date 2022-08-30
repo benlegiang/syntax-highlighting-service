@@ -25,8 +25,8 @@ public class PredictionService {
 
 
     public PredictionService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("http://syntax-highlighting-service-prediction-api:8000").build();
-        //this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
+        //this.webClient = webClientBuilder.baseUrl("http://syntax-highlighting-service-prediction-api:8000").build();
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8000").build();
 
     }
 
@@ -39,7 +39,7 @@ public class PredictionService {
             requestBody.put("tokenIds", annotationEntity.getTokenIds());
 
             String response = this.webClient.post()
-                    .uri("/predict")
+                    .uri("/api/v1/predict")
                     .header("Content-Type", "application/json")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)

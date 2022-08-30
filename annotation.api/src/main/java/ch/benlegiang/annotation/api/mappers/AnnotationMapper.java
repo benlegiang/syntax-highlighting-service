@@ -20,6 +20,7 @@ public interface AnnotationMapper {
     @Mapping(target = "id")
     @Mapping(target = "codeLanguage")
     @Mapping(target = "sourceCode")
+    @Mapping(target = "tokens")
     @Mapping(target = "prediction")
     AnnotationGetDTO convertAnnotationEntityToGetDTO(AnnotationEntity annotationEntity);
 

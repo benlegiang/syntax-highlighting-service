@@ -32,8 +32,13 @@ public class AnnotationUtil {
         return hToks;
     }
 
-    public static List<Integer> lexSourceCode(AnnotationEntity annotationEntity) {
+    public static LTok[] lexSourceCode(AnnotationEntity annotationEntity) {
         LTok[] lToks = lex(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
+
+        return lToks;
+    }
+
+    public static List<Integer> getTokenIdsFromLToks(LTok[] lToks) {
         List<Integer> tokenIds = new ArrayList<>();
 
         for (LTok lTok : lToks) {
