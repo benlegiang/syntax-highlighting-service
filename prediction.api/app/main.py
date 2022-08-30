@@ -44,7 +44,6 @@ def deploy_latest_model():
     model_lang: str = request.args.get('lang').upper()
     model_number: int = int(request.args.get('no'))
     try:
-        print("ENDPOINT IS CALLED")
         modelService.pull_latest_model(model_lang, model_number)
         modelService.setup_models_for_prediction()
         return jsonify({'success': True})
