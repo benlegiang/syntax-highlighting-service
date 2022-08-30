@@ -33,6 +33,7 @@ class ModelService:
                 self.fine_tune_model(model, model_number, model_lang)
             else:
                 self.save_model_to_db(model, model_number, model_lang, 0, 0, 0, 100)
+                return model_number
 
         elif model_lang == 'JAVA':
             model_number = self.get_latest_model_number(model_lang) + 1
@@ -42,7 +43,7 @@ class ModelService:
                 self.fine_tune_model(model, model_number, model_lang)
             else:
                 self.save_model_to_db(model, model_number, model_lang, 0, 0, 0, 100)
-            
+                return model_number
         
         elif model_lang == 'KOTLIN':
             model_number = self.get_latest_model_number(model_lang) + 1
@@ -52,7 +53,7 @@ class ModelService:
                 self.fine_tune_model(model, model_number, model_lang)
             else:
                 self.save_model_to_db(model, model_number, model_lang, 0, 0, 0, 100)
-
+                return model_number
 
     def get_latest_model_number(self, model_lang: str):
         db = self.client[self.database]
@@ -136,7 +137,7 @@ class ModelService:
 
 
             if self.evaluate_update_operation(accuracy, loss, training_size) == True:
-                self.update_db_test_set(test_data)
+                self.update_test_db_set(test_data)
                 self.save_model_to_db(model, model_number, model_lang, training_size, test_size, accuracy, loss)
                 self.deploy_latest_model(model_lang, model_number)
 
@@ -183,10 +184,12 @@ class ModelService:
         return filtered_a
 
     def deploy_latest_model(self, model_lang: str, model_number: int):
-        requests.post(self.prediction_api + f'/deploy?lang={model_lang}&no={model_number}')
+        try:
+            requests.post(self.prediction_api + f'/deploy?lang={model_lang}&no={model_number}')
+        except Exception as e:
+            logging.error(e)
 
     def check_db_changes(self, database: str, annotations_collection: str, threshold: int): 
-        print("[INFO] CHECKING DATABASE CHANGES!")
         db = self.client[database]
         collection = db[annotations_collection]
 
@@ -197,9 +200,6 @@ class ModelService:
         python3_model_number_latest = self.get_latest_model_number('PYTHON3') 
         java_model_number_latest = self.get_latest_model_number('JAVA') 
         kotlin_model_number_latest = self.get_latest_model_number('KOTLIN')
-
-        print("Before: ", self.python3_size)
-        print("After: ", python3_size)
 
         if python3_model_number_latest > 0:
             if python3_size - self.python3_size > threshold and python3_size != 0:
