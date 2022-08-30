@@ -12,8 +12,8 @@ database: str = 'syntaxHighlighting'
 annotations_collection: str = 'annotations'
 batch_size: int = 20000
 training_size: float = 0.8
-check_db_interval: int = 30 # in seconds for now
-threshold = 10
+check_db_interval: int = 120 # in seconds for now
+threshold = 100
 
 modelService = ModelService(prediction_api, database, annotations_collection, batch_size, training_size)
 
@@ -21,7 +21,7 @@ modelService = ModelService(prediction_api, database, annotations_collection, ba
 
 scheduler = BackgroundScheduler()
 
-scheduler.add_job(modelService.check_db_changes, 'interval', seconds=check_db_interval, args=(database, annotations_collection, threshold))
+scheduler.add_job(modelService.check_db_changes, 'interval', minutes=check_db_interval, args=(database, annotations_collection, threshold))
 scheduler.start()
 
 @app.route("/", methods=['GET', 'POST'])
