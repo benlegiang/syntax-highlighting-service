@@ -10,9 +10,10 @@ class ModelService:
         self.database = database
         self.training_api = training_api
         # Loads for each language its model from the database stored as binary
-        self.python_model: SHModel = self.load_model_from_db('PYTHON3', self.get_latest_model_number('PYTHON3'))
-        self.java_model: SHModel = self.load_model_from_db('JAVA', self.get_latest_model_number('JAVA'))
-        self.kotlin_model: SHModel = self.load_model_from_db('KOTLIN', self.get_latest_model_number('KOTLIN'))
+        self.python_model: SHModel = self.load_model_from_db('PYTHON3', None)
+        self.java_model: SHModel = self.load_model_from_db('JAVA', None)
+        self.kotlin_model: SHModel = self.load_model_from_db('KOTLIN', None)
+
 
     def setup_models_for_prediction(self):
 
@@ -57,7 +58,7 @@ class ModelService:
 
         pickled_model = json_data['modelData']
 
-        print(f'Success: Loaded model {model_number} for {model_lang}')
+        print(f'[SUCCESS]: Loaded model {model_number} for {model_lang}')
         return pickle.loads(pickled_model)   
 
     def get_latest_model_number(self, model_lang: str):
@@ -71,17 +72,18 @@ class ModelService:
 
     # Returns a model
     def load_model_from_db(self, model_lang: str, model_number: int) -> SHModel:
-        try:
-            if self.check_if_model_exists(model_lang):
-                return self.get_model_data(model_number, model_lang)
+        try: 
+            if model_number == None and self.check_if_model_exists(model_lang):
+                latest = self.get_latest_model_number(model_lang)
+                return self.get_model_data(latest, model_lang)
 
             else:
                 # Make request to training.api for it to init training of very first model and save it to DB
 
-                request = requests.post(self.training_api + f'?lang={model_lang}').json()
+                request = requests.post(self.training_api + f'/build?lang={model_lang}').json()
 
                 if request['success'] == True and request['modelNumber']:
-                    return self.get_model_data(model_number, model_lang)
+                    return self.get_model_data(request['modelNumber'], model_lang)
 
         except Exception as e: 
             print(f'Error: Unable to load model - ', e)

@@ -5,11 +5,10 @@ from app.services.ModelService import *
 app = Flask(__name__)
 
 database = 'syntaxHighlighting'
-# training_api = 'http://localhost:8001/api/v1/build'
+# training_api = 'http://localhost:8001/api/v1'
 training_api = 'http://syntax-highlighting-service-training-api:8001/build'
 
 modelService = ModelService(database, training_api)
-modelService.setup_models_for_prediction()
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
@@ -45,6 +44,7 @@ def deploy_latest_model():
     model_lang: str = request.args.get('lang').upper()
     model_number: int = int(request.args.get('no'))
     try:
+        print("ENDPOINT IS CALLED")
         modelService.pull_latest_model(model_lang, model_number)
         modelService.setup_models_for_prediction()
         return jsonify({'success': True})

@@ -2,7 +2,6 @@ from lib2to3.pygram import python_symbols
 import pickle
 from datetime import datetime
 import random
-import time
 from app.utils.SHModelUtils import JAVA_LANG_NAME, KOTLIN_LANG_NAME, PYTHON3_LANG_NAME, SHModel
 from app.utils.services.MongoDatabase import MongoDatabase
 import logging
@@ -24,13 +23,6 @@ class ModelService:
         self.java_size = 0
         self.kotlin_size = 0
 
-    def build_deploy_model(self,model_lang: str):
-        model_number = self.build_model(model_lang)
-        self.trigger_model_pull(model_lang, model_number)
-
-    def trigger_model_pull(self, model_lang: str, model_number: int):
-        requests.post(self.prediction_api + f'/deploy?lang={model_lang}&no={model_number}')
-
     def build_model(self, model_lang: str):
         if model_lang == 'PYTHON3':
             model_number = self.get_latest_model_number(model_lang) + 1
@@ -42,8 +34,6 @@ class ModelService:
             else:
                 self.save_model_to_db(model, model_number, model_lang, 0, 0, 0, 100)
 
-            return model_number
-
         elif model_lang == 'JAVA':
             model_number = self.get_latest_model_number(model_lang) + 1
             model = SHModel(JAVA_LANG_NAME, f'model_{model_number}')
@@ -53,8 +43,6 @@ class ModelService:
             else:
                 self.save_model_to_db(model, model_number, model_lang, 0, 0, 0, 100)
             
-            return model_number
-
         
         elif model_lang == 'KOTLIN':
             model_number = self.get_latest_model_number(model_lang) + 1
@@ -64,7 +52,7 @@ class ModelService:
                 self.fine_tune_model(model, model_number, model_lang)
             else:
                 self.save_model_to_db(model, model_number, model_lang, 0, 0, 0, 100)
-            return model_number
+
 
     def get_latest_model_number(self, model_lang: str):
         db = self.client[self.database]
@@ -76,7 +64,6 @@ class ModelService:
         return size
 
     def save_model_to_db(self, model: SHModel, model_number: int, model_lang: str, training_size: int, test_size: int, accuracy: float, loss: float):
-        model.persist_model()
         try:
             pickled_model = pickle.dumps(model)
 
@@ -128,52 +115,78 @@ class ModelService:
         try: 
             annotations = self.load_annotations_from_db(model_lang)
 
-            train_data = annotations[:int((len(annotations)+1)*self.training_size)]
-            test_data = annotations[int((len(annotations)+1)*self.training_size):]
+            train_a = [a for a in annotations if a['isTestItem'] == False]
+            test_a = [a for a in annotations if a['isTestItem'] == True]
 
-            loss = None
-            accuracy = None
+            random.shuffle(train_a)
+
+            train_a_filtered = self.remove_duplicates(train_a)
+
+            train_data = train_a_filtered[:int((len(train_a_filtered)+1)*self.training_size)]
+            test_data = test_a + train_a_filtered[int((len(train_a_filtered)+1)*self.training_size):]
+
             training_size = len(train_data)
             test_size = len(test_data)
-            
-
-            random.shuffle(annotations)
 
 
             for annotation in train_data:
                 loss = model.finetune_on(annotation['tokenIds'], annotation['formal'])
 
-            test_ids = [test.get('_id') for test in test_data]
+            accuracy = self.get_model_accuracy(model, test_data)
 
-            # Set up for prediction to measure accuracy of fine-tuning
-            model.setup_for_prediction()
-            
-            correct = 0
-            accuracy = None
 
-            for annotation in test_data:
-                p = model.predict(annotation['tokenIds'])
-                if p == annotation['formal']:
-                    correct += 1
-
-                accuracy = correct / test_size * 100
-
-                db = self.client[self.database]
-                collection = db[self.collection]
-
-                query = {'_id': {'$in': test_ids}}
-                update = {'$set': {'isTestItem': True}}
-
-                collection.update_many(query, update)
-
-            # TODO: Only save to DB if it actually improved!!!!!!!!!!
-            # See ConUpdate/Reuse
-            self.save_model_to_db(model, model_number, model_lang, training_size, test_size, accuracy, loss)
+            if self.evaluate_update_operation(accuracy, loss, training_size) == True:
+                self.update_db_test_set(test_data)
+                self.save_model_to_db(model, model_number, model_lang, training_size, test_size, accuracy, loss)
+                self.deploy_latest_model(model_lang, model_number)
 
         except Exception as e:
             logging.error(e)
 
+    def update_test_db_set(self, test_data):
+
+        test_ids = [test.get('_id') for test in test_data]
+        db = self.client[self.database]
+        collection = db[self.collection]
+        query = {'_id': {'$in': test_ids}}
+        update = {'$set': {'isTestItem': True}}
+        collection.update_many(query, update)
+
+    def evaluate_update_operation(self, accuracy, loss, training_size) -> bool:
+
+        return True
+
+    def get_model_accuracy(self, model: SHModel, test_data):
+
+        model.setup_for_prediction()
+
+        correct = 0
+        accuracy = None
+
+        for annotation in test_data:
+            p = model.predict(annotation['tokenIds'])
+            if p == annotation['formal']:
+                correct += 1
+
+        accuracy = correct / len(test_data) * 100
+
+        return accuracy
+
+    # Removes duplicate tokenIds from training set
+    def remove_duplicates(self, train_a):
+        filtered_a = []
+
+        for a in train_a:
+            if a['tokenIds'] not in filtered_a:
+                filtered_a.append(a)
+
+        return filtered_a
+
+    def deploy_latest_model(self, model_lang: str, model_number: int):
+        requests.post(self.prediction_api + f'/deploy?lang={model_lang}&no={model_number}')
+
     def check_db_changes(self, database: str, annotations_collection: str, threshold: int): 
+        print("[INFO] CHECKING DATABASE CHANGES!")
         db = self.client[database]
         collection = db[annotations_collection]
 
@@ -185,10 +198,12 @@ class ModelService:
         java_model_number_latest = self.get_latest_model_number('JAVA') 
         kotlin_model_number_latest = self.get_latest_model_number('KOTLIN')
 
+        print("Before: ", self.python3_size)
+        print("After: ", python3_size)
+
         if python3_model_number_latest > 0:
             if python3_size - self.python3_size > threshold and python3_size != 0:
                 self.build_model('PYTHON3')
-                # Re-count due to changes caused by splitting data sets
                 self.python3_size = collection.count_documents({'codeLanguage': 'PYTHON3', 'isTrainable': True, 'isTestItem': False})
         
         if java_model_number_latest > 0:
@@ -199,7 +214,6 @@ class ModelService:
         if kotlin_model_number_latest > 0:
             if kotlin_size - self.kotlin_size > threshold and kotlin_size != 0:
                 self.build_model('KOTLIN')
-                print("Success: Built Kotlin model")
                 self.kotlin_size = collection.count_documents({'codeLanguage': 'KOTLIN', 'isTrainable': True, 'isTestItem': False})
 
 

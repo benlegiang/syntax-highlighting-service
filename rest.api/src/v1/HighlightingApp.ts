@@ -12,8 +12,6 @@ export class HighlightingApp {
 
     const requestBody = req?.body || null;
 
-    const t = performance.now();
-
     if (RequestCheckUtil.check(requestBody)) {
       const highlightingService = new HighlightingService();
 
