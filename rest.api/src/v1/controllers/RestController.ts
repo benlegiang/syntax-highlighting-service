@@ -21,7 +21,7 @@ export class RestController {
       scope.setTag("source", "rest.api");
 
       new HighlightingApp()
-        .execute(req)
+        .process(req)
         .then((result) => {
           scope.getTransaction().finish();
           res.json(result);

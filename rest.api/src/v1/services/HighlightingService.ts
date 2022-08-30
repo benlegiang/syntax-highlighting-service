@@ -1,10 +1,11 @@
 import { environment } from "./../../environments/environment-prod";
 import axios from "axios";
 
-interface HighlightingResult {
+export interface HighlightingResult {
   id: String;
   codeLanguage: String;
   sourceCode: String;
+  tokens: any[];
   prediction: number[];
 }
 
