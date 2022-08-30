@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 database = 'syntaxHighlighting'
 # training_api = 'http://localhost:8001/api/v1'
-training_api = 'http://syntax-highlighting-service-training-api:8001/build'
+training_api = 'http://syntax-highlighting-service-training-api:8001/api/v1'
 
 modelService = ModelService(database, training_api)
 
