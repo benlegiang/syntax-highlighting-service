@@ -1,0 +1,14 @@
+version: '3.8'
+
+# WEB APP SERVICES
+services:
+  prod:
+    container_name: syntax-highlighting-service-web-app
+    build: .
+    ports: 
+      - 80:${REACT_APP_WEB_APP_PORT}" 
+      
+
+
+
+

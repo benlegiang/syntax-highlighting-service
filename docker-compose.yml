@@ -46,7 +46,7 @@ services:
     depends_on:
       - annotation-api
     networks:
-      - backend    
+      - backend   
     restart: always
   annotation-api:
     container_name: syntax-highlighting-service-annotation-api
@@ -56,9 +56,20 @@ services:
       - mongodb
     ports:
       - 8080:8080
-    restart: always
     networks:
       - backend
+    restart: always
+  web-app:
+    container_name: syntax-highlighting-service-web-app
+    build: ./web-app
+    image: benlegiang/syntax-highlighting-service-web-app:master
+    ports:
+      - $WEB_APP_HOST_PORT:3000
+    depends_on:
+      - rest-api
+    networks: 
+      - backend
+    restart: always
   github-scraper:
     container_name: syntax-highlighting-service-github-scraper
     build: ./github-scraper

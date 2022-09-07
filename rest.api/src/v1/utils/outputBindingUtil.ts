@@ -7,11 +7,14 @@ export class OutputBindingUtil {
     const prediction = input?.prediction;
 
     const bindings = input?.tokens?.map((token, index) => {
-      const stringToken = src.substring(token?.startIndex, token?.endIndex + 1);
+      // const stringToken = src.substring(token?.startIndex, token?.endIndex + 1);
 
-      return { class: HCode[prediction[index]], token: stringToken };
+      return { class: HCode[prediction[index]], start: token?.startIndex, end: token?.endIndex };
     });
 
-    return bindings;
+    return {
+      src: src,
+      result: bindings,
+    };
   }
 }
