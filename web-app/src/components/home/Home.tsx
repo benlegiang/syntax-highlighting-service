@@ -27,6 +27,7 @@ const Button = styled.button`
 `;
 
 const EditorInput = styled.textarea`
+  margin: 2px;
   border: none;
   border: 3px solid black;
   font-family: inherit;
@@ -40,18 +41,22 @@ const EditorInput = styled.textarea`
 `;
 
 const EditorOutput = styled.div`
+  margin: 2px;
   border: none;
   border: 3px solid black;
   font-family: inherit;
   font-size: 50%;
-  position: center;
   width: 35vw;
   height: 50vh;
   background: lightgrey;
   resize: none;
   position: center;
   bottom: 0;
-  flexdirection: "row";
+  overflow-y: scroll;
+  white-space: pre;
+  margin: 0;
+  padding: 0;
+  justify-content: start;
 `;
 
 const LanguageSelection = styled.select`
@@ -191,7 +196,7 @@ const Home = () => {
     return (
       <EditorOutput>
         {getStyles()}
-        <code style={{ marginLeft: "0px" }}>
+        <code style={{ verticalAlign: "left" }}>
           {filtered.map((r) => {
             return <span className={r.class}>{r.token}</span>;
           })}
