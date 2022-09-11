@@ -27,36 +27,28 @@ const Button = styled.button`
 `;
 
 const EditorInput = styled.textarea`
-  margin: 2px;
-  border: none;
   border: 3px solid black;
   font-family: inherit;
-  font-size: 50%;
-  position: center;
+  font-size: 40%;
   width: 35vw;
-  height: 50vh;
+  height: 65vh;
   background: lightgrey;
   resize: none;
   boxshadow: 10px 10px 10px #f4aab9;
 `;
 
 const EditorOutput = styled.div`
-  margin: 2px;
-  border: none;
+  text-align: start !important;
   border: 3px solid black;
   font-family: inherit;
-  font-size: 50%;
+  font-size: 40%;
   width: 35vw;
-  height: 50vh;
+  height: 65vh;
   background: lightgrey;
   resize: none;
-  position: center;
-  bottom: 0;
   overflow-y: scroll;
   white-space: pre;
-  margin: 0;
-  padding: 0;
-  justify-content: start;
+  boxshadow: 10px 10px 10px #f4aab9;
 `;
 
 const LanguageSelection = styled.select`
@@ -196,7 +188,8 @@ const Home = () => {
     return (
       <EditorOutput>
         {getStyles()}
-        <code style={{ verticalAlign: "left" }}>
+        {/* <code style={{ verticalAlign: "left" }}> */}
+        <code>
           {filtered.map((r) => {
             return <span className={r.class}>{r.token}</span>;
           })}
@@ -236,7 +229,6 @@ const Home = () => {
         />
         {highlighting ? getFormatting() : null}
       </Container>
-
       <Container>
         <Button
           disabled={!value}
