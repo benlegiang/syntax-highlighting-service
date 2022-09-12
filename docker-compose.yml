@@ -6,7 +6,7 @@ services:
     build: ./web-app
     image: benlegiang/syntax-highlighting-service-web-app:master
     ports:
-      - $WEB_APP_HOST_PORT:$WEB_APP_HOST_PORT
+      - $WEB_APP_HOST_PORT:3000
     depends_on:
       - rest-api
     networks: 
