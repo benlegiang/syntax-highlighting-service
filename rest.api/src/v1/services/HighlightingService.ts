@@ -34,7 +34,7 @@ export class HighlightingService {
   public async highlight(codeLanguage: String, sourceCode: String): Promise<HighlightingResult> {
     const requestBody = JSON.stringify({
       codeLanguage: codeLanguage.toUpperCase(),
-      sourceCode: sourceCode,
+      sourceCode: Buffer.from(sourceCode, "utf-8").toString(),
     });
 
     try {

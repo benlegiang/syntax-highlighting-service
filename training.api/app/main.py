@@ -12,8 +12,8 @@ database: str = 'syntaxHighlighting'
 annotations_collection: str = 'annotations'
 batch_size: int = 20000
 training_size: float = 0.8
-check_db_interval: int = 120 # in seconds for now
-threshold = 100
+check_db_interval: int = 5 # in seconds for now
+threshold = 500
 
 modelService = ModelService(prediction_api, database, annotations_collection, batch_size, training_size)
 
@@ -39,7 +39,6 @@ def build_model():
 
     except Exception as e: 
         return jsonify({'success': False, 'message': e })
-    pass
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=8001)

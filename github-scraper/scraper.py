@@ -1,3 +1,5 @@
+from asyncio import as_completed
+from concurrent.futures import ThreadPoolExecutor
 from threading import *
 import time
 from xmlrpc.client import boolean
@@ -211,30 +213,48 @@ def send_code_for_annotation(code_lang):
         print("Annotated files successfully!")
     except Exception as e:
         print(e)
+
+def send_single_entry(code_lang, src, index):
+
+    res = requests.post(annotation_api_url, json={
+        "codeLanguage": code_lang,
+        "sourceCode": src
+    })
+
+    print(f'File {index} sent')
+    return res.status_code
         
-def annotateFiles(code_lang):
-    data = [json.loads(line) for line in open('data-python.jsonl', 'r')]
-
-    dataset_length = len(data)
-    
-    for i in range(dataset_length):
-            try:
-                res = requests.post(annotation_api_url, json={
-                    "codeLanguage": code_lang,
-                    "sourceCode": data[i]['source']
-                    })
-                print(f"Sending file {i + 1}/{dataset_length} with status code: {res.status_code}")
-
-            except Exception as e:
-                print(e)
+def annotate_files(code_lang, file_name):
+    data = [json.loads(line) for line in open(file_name, 'r')]
 
 
-    print("Annotated files successfully!")
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        threads = []
+
+        for i in range(len(data)):
+            threads.append(executor.submit(send_single_entry, code_lang, data[i]['source'], i))
+
+# def annotate_files(code_lang):
+#     data = [json.loads(line) for line in open('data-python.jsonl', 'r')]
+
+#     for i in range(len(data)):
+#             try:
+#                 res = requests.post(annotation_api_url, json={
+#                     "codeLanguage": code_lang,
+#                     "sourceCode": data[i]['source']
+#                     })
+#                 print(f"Sending file {i + 1}/{len(data)} with status code: {res.status_code}")
+
+#             except Exception as e:
+#                 print(e)
+
+
+#     print("Annotated files successfully!")
 
 
 if __name__ == '__main__':
     # scrape(sys.argv[1], int(sys.argv[2]))
     # extract_source_code_from_file(sys.argv[1])
     # send_code_for_annotation(sys.argv[1])
-    annotateFiles(sys.argv[1])
+    annotate_files(sys.argv[1], sys.argv[2])
     

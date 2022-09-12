@@ -10,10 +10,10 @@ import resolver.KotlinResolver;
 import resolver.Python3Resolver;
 import resolver.Resolver;
 
-import javax.swing.text.html.parser.Parser;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AnnotationUtil {
 
@@ -35,32 +35,25 @@ public class AnnotationUtil {
     public static LTok[] lexSourceCode(AnnotationEntity annotationEntity) {
         LTok[] lToks = lex(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
 
+        if (lToks == null) {
+            throw new NullPointerException("Lexing the source code failed");
+        }
+
         return lToks;
     }
 
     public static List<Integer> getTokenIdsFromLToks(LTok[] lToks) {
-        List<Integer> tokenIds = new ArrayList<>();
-
-        for (LTok lTok : lToks) {
-            tokenIds.add(lTok.tokenId);
-        }
-        return tokenIds;
+        return Arrays.stream(lToks).map(lTok -> lTok.tokenId).collect(Collectors.toList());
     }
 
     public static List<Integer> highlightSourceCode(ParserPostDTO parserPostDTO) {
         HTok[] hToks = AnnotationUtil.highlight(parserPostDTO);
-        List<Integer> hCodeValues = new ArrayList<>();
 
-        if (hToks != null) {
-            if (hToks.length > 2) {
-                for (int i = 0; i <= hToks.length - 2; i++) {
-                    hCodeValues.add(hToks[i].hCodeValue);
-                }
-            }
+        if (hToks == null) {
+            throw new NullPointerException("Highlighting source code failed");
         }
-        return hCodeValues;
+        return Arrays.stream(hToks).map(hTok -> hTok.hCodeValue).collect(Collectors.toList());
     }
-
     public static Resolver getResolverByLang(CodeLanguage lang) {
         Resolver resolver;
 

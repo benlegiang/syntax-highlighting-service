@@ -157,6 +157,7 @@ class ModelService:
 
         return True
 
+    # Calculate accuracy for given fine-tuned model
     def get_model_accuracy(self, model: SHModel, test_data):
 
         model.setup_for_prediction()
@@ -186,10 +187,12 @@ class ModelService:
     def deploy_latest_model(self, model_lang: str, model_number: int):
         try:
             requests.post(self.prediction_api + f'/deploy?lang={model_lang}&no={model_number}')
+            print("DEPLOYED MODEL FOR", model_lang)
         except Exception as e:
             logging.error(e)
 
     def check_db_changes(self, database: str, annotations_collection: str, threshold: int): 
+        print("CHECKING DB CHANGES")
         db = self.client[database]
         collection = db[annotations_collection]
 

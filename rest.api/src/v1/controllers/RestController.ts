@@ -39,7 +39,6 @@ export class RestController {
         .process(req)
         .then((result) => {
           scope.getTransaction().finish();
-          console.log(result);
           res.json(result);
         })
         .catch((e) => {

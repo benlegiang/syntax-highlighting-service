@@ -31,11 +31,11 @@ public class AnnotationService {
             Query query = new Query(Criteria.where("id").is(parserPostDTO.getId()));
             AnnotationEntity annotationEntity = mongoTemplate.findOne(query, AnnotationEntity.class);
 
-            byte[] bytes = parserPostDTO.getSourceCode().getBytes(StandardCharsets.UTF_8);
+            // byte[] bytes = parserPostDTO.getSourceCode().getBytes(StandardCharsets.UTF_8);
 
-            String utf8EncodedString = new String(bytes, StandardCharsets.UTF_8);
+            // String utf8EncodedString = new String(bytes, StandardCharsets.UTF_8);
 
-            parserPostDTO.setSourceCode(utf8EncodedString);
+            // parserPostDTO.setSourceCode(utf8EncodedString);
 
             List<Integer> formal = AnnotationUtil.highlightSourceCode(parserPostDTO);
 

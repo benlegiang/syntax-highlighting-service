@@ -30,7 +30,7 @@ const EditorInput = styled.textarea`
   border: 3px solid black;
   font-family: inherit;
   font-size: 40%;
-  width: 35vw;
+  width: 45vw;
   height: 65vh;
   background: lightgrey;
   resize: none;
@@ -42,7 +42,7 @@ const EditorOutput = styled.div`
   border: 3px solid black;
   font-family: inherit;
   font-size: 40%;
-  width: 35vw;
+  width: 45vw;
   height: 65vh;
   background: lightgrey;
   resize: none;
@@ -113,12 +113,12 @@ const Home = () => {
         font-style: normal;
     }
     .CHAR_STRING_LITERAL {
-        color: #8FBC8F;
+        color: black;
         font-weight: normal;
         font-style: normal;
     }
     .COMMENT {
-        color: #A9A9A9;
+        color: grey;
         font-weight: normal;
         font-style: italic;
     }
@@ -128,7 +128,7 @@ const Home = () => {
         font-style: normal;
     }
     .FUNCTION_DECLARATOR {
-        color: #FF00FF;
+        color: blue;
         font-weight: bold;
         font-style: normal;
     }
@@ -138,7 +138,7 @@ const Home = () => {
         font-style: normal;
     }
     .TYPE_IDENTIFIER {
-        color: #008000;
+        color: yellow;
         font-weight: bold;
         font-style: normal;
     }
@@ -189,7 +189,7 @@ const Home = () => {
       <EditorOutput>
         {getStyles()}
         {/* <code style={{ verticalAlign: "left" }}> */}
-        <code>
+        <code style={{ verticalAlign: "left" }}>
           {filtered.map((r) => {
             return <span className={r.class}>{r.token}</span>;
           })}
