@@ -228,29 +228,11 @@ def annotate_files(code_lang, file_name):
     data = [json.loads(line) for line in open(file_name, 'r')]
 
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         threads = []
 
         for i in range(len(data)):
             threads.append(executor.submit(send_single_entry, code_lang, data[i]['source'], i))
-
-# def annotate_files(code_lang):
-#     data = [json.loads(line) for line in open('data-python.jsonl', 'r')]
-
-#     for i in range(len(data)):
-#             try:
-#                 res = requests.post(annotation_api_url, json={
-#                     "codeLanguage": code_lang,
-#                     "sourceCode": data[i]['source']
-#                     })
-#                 print(f"Sending file {i + 1}/{len(data)} with status code: {res.status_code}")
-
-#             except Exception as e:
-#                 print(e)
-
-
-#     print("Annotated files successfully!")
-
 
 if __name__ == '__main__':
     # scrape(sys.argv[1], int(sys.argv[2]))

@@ -1,6 +1,76 @@
 version: '3.8'
 
 services:
+  web-app:
+    container_name: syntax-highlighting-service-web-app
+    build: ./web-app
+    image: benlegiang/syntax-highlighting-service-web-app:master
+    ports:
+      - $WEB_APP_HOST_PORT:$WEB_APP_HOST_PORT
+    depends_on:
+      - rest-api
+    networks: 
+      - backend
+    restart: always
+  rest-api:
+    container_name: syntax-highlighting-service-rest-api
+    build: ./rest.api
+    image: benlegiang/syntax-highlighting-service-rest-api:master
+    ports:
+      - $REST_API_HOST_PORT:$REST_API_HOST_PORT
+    depends_on:
+      - annotation-api
+    networks:
+      - backend   
+    restart: always
+
+  annotation-api:
+    build: ./annotation.api
+    image: benlegiang/syntax-highlighting-service-annotation-api:master
+    env_file:
+      - .env
+    expose:
+      - "${ANNOTATION_API_HOST_PORT}"
+    deploy:
+      replicas: 2
+    depends_on:
+      - mongodb
+    networks:
+      - backend
+    restart: always
+
+  prediction-api:
+    build: ./prediction.api
+    image: benlegiang/syntax-highlighting-service-prediction-api:master
+    env_file:
+      - .env
+    expose:
+      - "${PREDICTION_API_HOST_PORT}"
+    deploy:
+      replicas: 2
+    depends_on:
+      - mongodb
+      - training-api
+    networks:
+      - backend 
+  training-api:
+    container_name: syntax-highlighting-service-training-api
+    build: ./training.api
+    image: benlegiang/syntax-highlighting-service-training-api:master
+    expose:
+      - "${TRAINING_API_HOST_PORT}"
+    depends_on:
+      - mongodb
+    networks:
+      - backend
+  github-scraper:
+    container_name: syntax-highlighting-service-github-scraper
+    build: ./github-scraper
+    image: benlegiang/syntax-highlighting-service-github-scraper:master
+    depends_on:
+      - rest-api
+    networks:
+      - backend
   mongodb:
     container_name: syntax-highlighting-service-mongodb
     image: mongo:latest
@@ -12,73 +82,27 @@ services:
       - db-data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
-      - 27017:27017
+      - "$MONGO_HOST_PORT:$MONGO_HOST_PORT"
     networks:
       - backend
     restart: unless-stopped
-  prediction-api:
-    container_name: syntax-highlighting-service-prediction-api
-    build: ./prediction.api
-    image: benlegiang/syntax-highlighting-service-prediction-api:master
-    ports:
-      - $PREDICTION_API_HOST_PORT:8000
-    depends_on:
-      - mongodb
-      - training-api
-    networks:
-      - backend 
-  training-api:
-    container_name: syntax-highlighting-service-training-api
-    build: ./training.api
-    image: benlegiang/syntax-highlighting-service-training-api:master
-    ports:
-      - 8001:8001
-    depends_on:
-      - mongodb
-    networks:
-      - backend
-  rest-api:
-    container_name: syntax-highlighting-service-rest-api
-    build: ./rest.api
-    image: benlegiang/syntax-highlighting-service-rest-api:master
-    ports:
-      - $REST_API_HOST_PORT:8081
+  nginx:
+    image: nginx:latest
+    container_name: load-balancer
+    volumes: 
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    environment:
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+    env_file:
+      - .env
     depends_on:
       - annotation-api
-    networks:
-      - backend   
-    restart: always
-  annotation-api:
-    container_name: syntax-highlighting-service-annotation-api
-    build: ./annotation.api
-    image: benlegiang/syntax-highlighting-service-annotation-api:master
-    depends_on:
-      - mongodb
-    ports:
-      - 8080:8080
+      - prediction-api
+    expose:
+      - "${NGINX_HOST_PORT}"
     networks:
       - backend
-    restart: always
-  web-app:
-    container_name: syntax-highlighting-service-web-app
-    build: ./web-app
-    image: benlegiang/syntax-highlighting-service-web-app:master
-    ports:
-      - $WEB_APP_HOST_PORT:3000
-    depends_on:
-      - rest-api
-    networks: 
-      - backend
-    restart: always
-  github-scraper:
-    container_name: syntax-highlighting-service-github-scraper
-    build: ./github-scraper
-    image: benlegiang/syntax-highlighting-service-github-scraper:master
-    profiles: ["scraper"]
-    depends_on:
-      - rest-api
-    networks:
-      - backend
+    restart: unless-stopped
 volumes:
   db-data:
 networks:

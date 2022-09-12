@@ -22,4 +22,4 @@ WORKDIR $APP_HOME
 COPY --from=build $APP_HOME/build/libs/$ARTIFACT_NAME .
 EXPOSE 8080
 
-ENTRYPOINT exec java -jar -Xmx4096M ${ARTIFACT_NAME}
+ENTRYPOINT exec java -XX:+UnlockExperimentalVMOptions -XX:+UseContainerSupport -jar ${ARTIFACT_NAME}
