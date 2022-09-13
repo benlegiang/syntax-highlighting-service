@@ -18,7 +18,7 @@ export class HighlightingApp {
 
       const prediction = await highlightingService.highlight(requestBody.codeLanguage, requestBody.sourceCode);
 
-      highlightingService.parse(prediction);
+      // highlightingService.parse(prediction);
       const result = OutputBindingUtil.getBindings(prediction);
 
       span.finish();

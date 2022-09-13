@@ -32,7 +32,11 @@ services:
     expose:
       - "${ANNOTATION_API_HOST_PORT}"
     deploy:
-      replicas: 2
+      replicas: 3
+      resources:
+        limits:
+          memory: 3G
+          cpus: '1'
     depends_on:
       - mongodb
     networks:

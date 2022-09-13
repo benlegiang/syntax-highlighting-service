@@ -6,14 +6,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
-prediction_api = 'http://syntax-highlighting-service-prediction-api:8000/api/v1'
-# prediction_api = 'http://localhost:8000/api/v1'
+prediction_api = 'http://syntax-highlighting-service-load-balancer:7777/api/v1'
 database: str = 'syntaxHighlighting'
 annotations_collection: str = 'annotations'
 batch_size: int = 20000
 training_size: float = 0.8
-check_db_interval: int = 5 # in seconds for now
-threshold = 500
+check_db_interval: int = 5 
+threshold = 100
 
 modelService = ModelService(prediction_api, database, annotations_collection, batch_size, training_size)
 
@@ -42,10 +41,3 @@ def build_model():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True, port=8001)
-
-
-# job_defaults = {
-#     'coalesce': False,
-#     'max_instances': 1
-# }
-

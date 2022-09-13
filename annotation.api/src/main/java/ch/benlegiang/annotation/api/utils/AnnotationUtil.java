@@ -24,6 +24,13 @@ public class AnnotationUtil {
         return lToks;
     }
 
+    public static HTok[] parse(CodeLanguage codeLanguage, String sourceCode) {
+        Resolver resolver = getResolverByLang(codeLanguage);
+        HTok[] hToks = resolver.highlight(sourceCode);
+
+        return hToks;
+    }
+
     public static HTok[] highlight(ParserPostDTO parserPostDTO) {
         CodeLanguage codeLanguage = CodeLanguage.valueOf(parserPostDTO.getCodeLanguage());
 
@@ -46,13 +53,16 @@ public class AnnotationUtil {
         return Arrays.stream(lToks).map(lTok -> lTok.tokenId).collect(Collectors.toList());
     }
 
-    public static List<Integer> highlightSourceCode(ParserPostDTO parserPostDTO) {
+    public static List<Integer> getHCodeValuesFromHToks(HTok[] hToks) {
+        return Arrays.stream(hToks).map(hTok -> hTok.hCodeValue).collect(Collectors.toList());
+    }
+    public static List<Integer> parse(ParserPostDTO parserPostDTO) {
         HTok[] hToks = AnnotationUtil.highlight(parserPostDTO);
 
         if (hToks == null) {
             throw new NullPointerException("Highlighting source code failed");
         }
-        return Arrays.stream(hToks).map(hTok -> hTok.hCodeValue).collect(Collectors.toList());
+        return getHCodeValuesFromHToks(hToks);
     }
     public static Resolver getResolverByLang(CodeLanguage lang) {
         Resolver resolver;

@@ -19,6 +19,7 @@ public class AnnotationEntity {
     public LTok[] tokens;
     public List<Integer> tokenIds;
     public List<Integer> formal;
+    @Transient
     public List<Integer> prediction;
     public Boolean isTrainable;
     public Boolean isTestItem = false;

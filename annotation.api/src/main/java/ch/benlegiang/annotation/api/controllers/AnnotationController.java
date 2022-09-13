@@ -12,6 +12,7 @@ import lexer.LTok;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 @RestController
@@ -33,16 +34,16 @@ public class AnnotationController {
         AnnotationEntity annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToAnnotationEntity(annotationPostDto);
 
         LTok[] lToks = AnnotationUtil.lexSourceCode(annotationEntity);
-        List<Integer> tokenIds = AnnotationUtil.getTokenIdsFromLToks(lToks);
 
+        // Set results from lexer
         annotationEntity.setTokens(lToks);
-        annotationEntity.setTokenIds(tokenIds);
+        annotationEntity.setTokenIds(AnnotationUtil.getTokenIdsFromLToks(lToks));
 
         // Send tokenIds for prediction and set it on Entity object
         predictionService.setPrediction(annotationEntity);
 
-        // Save Entity to Mongo DB
-        annotationService.insertAnnotationEntity(annotationEntity);
+        // Sets HCodeValues and save Entity to Mongo DB
+        annotationService.setHCodeValues(annotationEntity);
 
         AnnotationGetDTO annotationGetDTO = AnnotationMapper.INSTANCE.convertAnnotationEntityToGetDTO(annotationEntity);
         return annotationGetDTO;
@@ -51,8 +52,6 @@ public class AnnotationController {
     @PostMapping(path= "/parse")
     @ResponseStatus(HttpStatus.OK)
     public void parse(@RequestBody ParserPostDTO parserPostDTO) {
-
         annotationService.setFormalHCodeValuesByIdOnDatabaseObject(parserPostDTO);
-
     }
 }

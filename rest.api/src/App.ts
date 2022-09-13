@@ -11,15 +11,13 @@ class App {
   constructor() {
     this.express = express();
     // Parses all bodies to json
-    this.express.use(express.json());
+    this.express.use(express.json({ limit: "50mb" }));
     // Uses compression for all HTTP responses
     this.express.use(this.compression());
     // To avoid "Request Entity too large" error
-    this.express.use(express.json({ limit: "50mb" }));
-    this.express.use(express.urlencoded({ limit: "50mb" }));
 
     Sentry.init({
-      environment: "LOCAL",
+      environment: "TEST1",
       dsn: "https://b2a73205682f49299647b69434915dbe@o1173927.ingest.sentry.io/6652790",
       integrations: [
         // enable HTTP calls tracing
