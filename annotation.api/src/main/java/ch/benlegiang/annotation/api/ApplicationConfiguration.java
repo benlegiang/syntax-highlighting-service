@@ -16,7 +16,7 @@ public class ApplicationConfiguration {
     @Bean(name = "cpuBoundThreadPoolTaskExecutor")
     public Executor cpuBoundThreadPoolTaskExecutor() {
         int coreCount = Runtime.getRuntime().availableProcessors();
-        return Executors.newFixedThreadPool(coreCount * 2);
+        return Executors.newFixedThreadPool(1);
     }
 
 }
