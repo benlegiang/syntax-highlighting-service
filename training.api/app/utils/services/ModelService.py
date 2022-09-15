@@ -131,7 +131,7 @@ class ModelService:
 
 
             for annotation in train_data:
-                loss = model.finetune_on(annotation['tokenIds'], annotation['formal'])
+                loss = model.finetune_on(annotation['hCodeTokenIds'], annotation['hCodeValues'])
 
             accuracy = self.get_model_accuracy(model, test_data)
 
@@ -166,8 +166,8 @@ class ModelService:
         accuracy = None
 
         for annotation in test_data:
-            p = model.predict(annotation['tokenIds'])
-            if p == annotation['formal']:
+            p = model.predict(annotation['hCodeTokenIds'])
+            if p == annotation['hCodeValues']:
                 correct += 1
 
         accuracy = correct / len(test_data) * 100
@@ -179,7 +179,7 @@ class ModelService:
         filtered_a = []
 
         for a in train_a:
-            if a['tokenIds'] not in filtered_a:
+            if a['hCodeTokenIds'] not in filtered_a:
                 filtered_a.append(a)
 
         return filtered_a
