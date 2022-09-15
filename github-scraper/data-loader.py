@@ -1,3 +1,4 @@
+import time
 import requests
 import json
 import sys
@@ -20,6 +21,7 @@ def annotate_files(code_lang, file_name):
 
     for i in range(len(data)):
         send_single_entry(code_lang, data[i]['source'], i)
+        time.sleep(0.2)
 
 if __name__ == '__main__':
     annotate_files(sys.argv[1], sys.argv[2])
