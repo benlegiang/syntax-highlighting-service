@@ -1,6 +1,5 @@
 package ch.benlegiang.annotation.api.utils;
 
-import ch.benlegiang.annotation.api.dtos.ParserPostDTO;
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
 import ch.benlegiang.annotation.api.enums.CodeLanguage;
 import lexer.HTok;
@@ -17,25 +16,27 @@ import java.util.stream.Collectors;
 
 public class AnnotationUtil {
 
-    public static LTok[] lex(CodeLanguage codeLanguage, String sourceCode) {
+    private static LTok[] lex(CodeLanguage codeLanguage, String sourceCode) {
         Resolver resolver = getResolverByLang(codeLanguage);
         LTok[] lToks = resolver.lex(sourceCode);
 
         return lToks;
     }
 
-    public static HTok[] parse(CodeLanguage codeLanguage, String sourceCode) {
+    private static HTok[] parse(CodeLanguage codeLanguage, String sourceCode) {
         Resolver resolver = getResolverByLang(codeLanguage);
         HTok[] hToks = resolver.highlight(sourceCode);
 
         return hToks;
     }
 
-    public static HTok[] highlight(ParserPostDTO parserPostDTO) {
-        CodeLanguage codeLanguage = CodeLanguage.valueOf(parserPostDTO.getCodeLanguage());
+    public static HTok[] highlightSourceCode(AnnotationEntity annotationEntity) {
+        HTok[] hToks = parse(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
+        System.out.println(annotationEntity);
 
-        Resolver resolver = getResolverByLang(codeLanguage);
-        HTok[] hToks = resolver.highlight(parserPostDTO.getSourceCode());
+        if (hToks == null) {
+            throw new NullPointerException("Highlighting the source code failed");
+        }
         return hToks;
     }
 
@@ -45,7 +46,6 @@ public class AnnotationUtil {
         if (lToks == null) {
             throw new NullPointerException("Lexing the source code failed");
         }
-
         return lToks;
     }
 
@@ -56,14 +56,11 @@ public class AnnotationUtil {
     public static List<Integer> getHCodeValuesFromHToks(HTok[] hToks) {
         return Arrays.stream(hToks).map(hTok -> hTok.hCodeValue).collect(Collectors.toList());
     }
-    public static List<Integer> parse(ParserPostDTO parserPostDTO) {
-        HTok[] hToks = AnnotationUtil.highlight(parserPostDTO);
 
-        if (hToks == null) {
-            throw new NullPointerException("Highlighting source code failed");
-        }
-        return getHCodeValuesFromHToks(hToks);
+    public static List<Integer> getHCodeTokenIdsFromHToks(HTok[] hToks) {
+        return Arrays.stream(hToks).map(hTok -> hTok.tokenId).collect(Collectors.toList());
     }
+
     public static Resolver getResolverByLang(CodeLanguage lang) {
         Resolver resolver;
 

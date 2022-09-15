@@ -30,12 +30,11 @@ public class PredictionService {
     }
 
     public AnnotationEntity setPrediction(AnnotationEntity annotationEntity) throws IOException {
-
         try {
             Map<String, Object> requestBody = new HashMap();
 
             requestBody.put("codeLanguage", annotationEntity.getCodeLanguage());
-            requestBody.put("tokenIds", annotationEntity.getTokenIds());
+            requestBody.put("tokenIds", annotationEntity.getLexed());
 
             String response = this.webClient.post()
                     .uri("/api/v1/predict")

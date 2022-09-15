@@ -2,7 +2,6 @@ package ch.benlegiang.annotation.api.controllers;
 
 import ch.benlegiang.annotation.api.dtos.AnnotationGetDTO;
 import ch.benlegiang.annotation.api.dtos.AnnotationPostDTO;
-import ch.benlegiang.annotation.api.dtos.ParserPostDTO;
 import ch.benlegiang.annotation.api.entities.AnnotationEntity;
 import ch.benlegiang.annotation.api.mappers.AnnotationMapper;
 import ch.benlegiang.annotation.api.services.AnnotationService;
@@ -12,8 +11,6 @@ import lexer.LTok;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.List;
 
 @RestController
 @RequestMapping("api/v1")
@@ -33,25 +30,19 @@ public class AnnotationController {
     public AnnotationGetDTO highlight(@RequestBody AnnotationPostDTO annotationPostDto) throws IOException {
         AnnotationEntity annotationEntity = AnnotationMapper.INSTANCE.convertAnnotationPostDTOToAnnotationEntity(annotationPostDto);
 
-        LTok[] lToks = AnnotationUtil.lexSourceCode(annotationEntity);
+        LTok[] lexed = AnnotationUtil.lexSourceCode(annotationEntity);
 
-        // Set results from lexer
-        annotationEntity.setTokens(lToks);
-        annotationEntity.setTokenIds(AnnotationUtil.getTokenIdsFromLToks(lToks));
+        // Set LToks and corresponding tokenIds on AnnotationEntity
+        annotationEntity.setTokens(lexed);
+        annotationEntity.setLexed(AnnotationUtil.getTokenIdsFromLToks(lexed));
 
         // Send tokenIds for prediction and set it on Entity object
         predictionService.setPrediction(annotationEntity);
 
         // Sets HCodeValues and save Entity to Mongo DB
-        annotationService.setHCodeValues(annotationEntity);
+        annotationService.highlightAsync(annotationEntity);
 
         AnnotationGetDTO annotationGetDTO = AnnotationMapper.INSTANCE.convertAnnotationEntityToGetDTO(annotationEntity);
         return annotationGetDTO;
-    }
-
-    @PostMapping(path= "/parse")
-    @ResponseStatus(HttpStatus.OK)
-    public void parse(@RequestBody ParserPostDTO parserPostDTO) {
-        annotationService.setFormalHCodeValuesByIdOnDatabaseObject(parserPostDTO);
     }
 }

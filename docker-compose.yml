@@ -67,14 +67,14 @@ services:
       - mongodb
     networks:
       - backend
-  github-scraper:
-    container_name: syntax-highlighting-service-github-scraper
-    build: ./github-scraper
-    image: benlegiang/syntax-highlighting-service-github-scraper:master
-    depends_on:
-      - rest-api
-    networks:
-      - backend
+  # github-scraper:
+  #   container_name: syntax-highlighting-service-github-scraper
+  #   build: ./github-scraper
+  #   image: benlegiang/syntax-highlighting-service-github-scraper:master
+  #   depends_on:
+  #     - rest-api
+  #   networks:
+  #     - backend
   mongodb:
     container_name: syntax-highlighting-service-mongodb
     image: mongo:latest

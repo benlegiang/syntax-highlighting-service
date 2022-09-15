@@ -17,8 +17,10 @@ public class AnnotationEntity {
     public String sourceCode;
     @Transient
     public LTok[] tokens;
-    public List<Integer> tokenIds;
-    public List<Integer> formal;
+    @Transient
+    public List<Integer> lexed;
+    public List<Integer> hCodeTokenIds;
+    public List<Integer> hCodeValues;
     @Transient
     public List<Integer> prediction;
     public Boolean isTrainable;

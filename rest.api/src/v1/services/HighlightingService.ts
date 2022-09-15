@@ -10,26 +10,6 @@ export interface HighlightingResult {
 }
 
 export class HighlightingService {
-  // Only send user input for ANTLR parsing using the Formal Model
-  // Does not need to be awaited because response is irrelevant
-  public parse(input: HighlightingResult): void {
-    const requestBody = JSON.stringify({
-      id: input?.id,
-      codeLanguage: input?.codeLanguage?.toUpperCase(),
-      sourceCode: input?.sourceCode,
-    });
-
-    try {
-      axios.post(environment.annotationApi.parserUrl, requestBody, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
   // Returns prediction in the form of HCode values
   public async highlight(codeLanguage: String, sourceCode: String): Promise<HighlightingResult> {
     const requestBody = JSON.stringify({
