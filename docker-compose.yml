@@ -7,6 +7,11 @@ services:
     image: benlegiang/syntax-highlighting-service-web-app:master
     ports:
       - $WEB_APP_HOST_PORT:3000
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'  
     depends_on:
       - rest-api
     networks: 
@@ -18,6 +23,11 @@ services:
     image: benlegiang/syntax-highlighting-service-rest-api:master
     ports:
       - $REST_API_HOST_PORT:$REST_API_HOST_PORT
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.25'
     depends_on:
       - annotation-api
     networks:
@@ -36,7 +46,7 @@ services:
       resources:
         limits:
           memory: 3G
-          cpus: '1'
+          cpus: '1.5'
     depends_on:
       - mongodb
     networks:
@@ -52,6 +62,10 @@ services:
       - "${PREDICTION_API_HOST_PORT}"
     deploy:
       replicas: 2
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
     depends_on:
       - mongodb
       - training-api
@@ -63,18 +77,15 @@ services:
     image: benlegiang/syntax-highlighting-service-training-api:master
     expose:
       - "${TRAINING_API_HOST_PORT}"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
     depends_on:
       - mongodb
     networks:
       - backend
-  # github-scraper:
-  #   container_name: syntax-highlighting-service-github-scraper
-  #   build: ./github-scraper
-  #   image: benlegiang/syntax-highlighting-service-github-scraper:master
-  #   depends_on:
-  #     - rest-api
-  #   networks:
-  #     - backend
   mongodb:
     container_name: syntax-highlighting-service-mongodb
     image: mongo:latest
@@ -87,6 +98,11 @@ services:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
       - "$MONGO_HOST_PORT:$MONGO_HOST_PORT"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
     networks:
       - backend
     restart: unless-stopped
@@ -104,6 +120,11 @@ services:
       - prediction-api
     expose:
       - "${NGINX_HOST_PORT}"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
     networks:
       - backend
     restart: unless-stopped
