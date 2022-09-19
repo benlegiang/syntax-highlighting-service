@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from app.utils.SHModelUtils import *
 from apscheduler.schedulers.background import BackgroundScheduler
 import docker
-from app.utils.services.TrainingService import TrainingService
+from app.services.TrainingService import TrainingService
 
 app = Flask(__name__)
 

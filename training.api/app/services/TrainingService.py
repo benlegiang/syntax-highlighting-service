@@ -4,7 +4,7 @@ import pickle
 from statistics import mean
 import requests
 from app.utils.SHModelUtils import JAVA_LANG_NAME, KOTLIN_LANG_NAME, PYTHON3_LANG_NAME, SHModel
-from app.utils.services.MongoDatabase import MongoDatabase
+from app.services.MongoDatabase import MongoDatabase
 
 
 class TrainingService:
@@ -67,6 +67,7 @@ class TrainingService:
 
             latest_model = self.get_model_data_pickled(model_json)
             latest_model_accuracy = model_json['accuracy']
+            latest_model_training_size = int(model_json['trainingSize'])
 
             # No latest model existing, skip!
             if latest_model == None:
@@ -85,11 +86,13 @@ class TrainingService:
 
             trained_model = self.train_model(latest_model, input_training, target_training)
             trained_accuracy, total_validation_size = self.get_model_accuracy(trained_model, lang, input_validation, target_validation)
+
+            total_training_size = latest_model_training_size + len(training_data)
             
             # If accuracy got better, save model to DB and make all prediction.api instances pull new model
             if trained_accuracy > latest_model_accuracy:
                 new_model_number = self.get_latest_model_number(lang) + 1
-                self.save_model_to_db(trained_model, new_model_number, lang, len(training_data), total_validation_size, trained_accuracy)
+                self.save_model_to_db(trained_model, new_model_number, lang, total_training_size, total_validation_size, trained_accuracy)
                 self.update_training_db_set(training_data)
                 self.update_validation_db_set(validation_data)
                 self.deploy_latest_model(lang, new_model_number)
@@ -176,7 +179,7 @@ class TrainingService:
                 return self.get_model_data_json(latest, model_lang)
             else:
                 return None
-        except Exception as e:
+        except:
             return None
 
     def check_if_model_exists(self, model_lang):
@@ -244,7 +247,8 @@ class TrainingService:
     def deploy_latest_model(self, model_lang: str, model_number: int):
         try:
             for i in range(len(self.prediction_containers)):
-                url = f'http:///syntax-highlighting-service-prediction-api-{i+1}/deploy?lang={model_lang}&no={model_number}'
+                instance = i + 1
+                url = f'http://syntax-highlighting-service-prediction-api-{instance}:8000/api/v1/deploy?lang={model_lang}&no={model_number}'
                 
                 requests.post(url)
                 
@@ -286,11 +290,7 @@ class TrainingService:
             annotations_query = collection.aggregate([
                 {
                     '$match': {'codeLanguage': lang, 'isTrained': False, 'isValidated': True}
-                },
-
-                {
-                    "$sample": {'size': self.batch_size}
-                },
+                }
             ])
 
             validation = [a for a in annotations_query]
