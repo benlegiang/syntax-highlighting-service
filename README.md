@@ -10,12 +10,20 @@ With the presence of online collaborative tools such as GitHub, StackOverflow an
 
 ### Built With
 
-* Docker
+#### Languages
 * Python
-* Java
 * TypeScript
+* Java
+
+#### Technologies
+* Docker
 * React
 * MongoDB
+* Express
+* Gunicorn
+* Flask
+* Gradle
+
 
 ## Getting Started
 
