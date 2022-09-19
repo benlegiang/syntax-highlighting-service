@@ -39,7 +39,7 @@ POST http://benlegiang.ch:8081/api/v1/highlight
 
 ## Getting Started
 
-You can run the project locally by following the steps.
+You can run the project locally by following these steps.
 
 ### Prerequisites
 
