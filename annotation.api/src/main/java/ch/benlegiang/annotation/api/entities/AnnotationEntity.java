@@ -23,6 +23,7 @@ public class AnnotationEntity {
     public List<Integer> hCodeValues;
     @Transient
     public List<Integer> prediction;
-    public Boolean isTrainable;
-    public Boolean isTestItem = false;
+    public Boolean isTrained = false;
+    public Boolean isValidated = false;
+    public Boolean correctPrediction;
 }

@@ -19,9 +19,6 @@ public class AnnotationService {
     @Async("cpuBoundThreadPoolTaskExecutor")
     public void highlightAsync(AnnotationEntity annotationEntity) {
 
-        System.out.println("Execute method asynchronously. "
-                + Thread.currentThread().getName());
-
         HTok[] hToks = AnnotationUtil.highlightSourceCode(annotationEntity);
 
         List<Integer> hCodeTokenIds = AnnotationUtil.getHCodeTokenIdsFromHToks(hToks);
@@ -32,10 +29,7 @@ public class AnnotationService {
         annotationEntity.setHCodeValues(hCodeValues);
 
         if (hCodeTokenIds != null && hCodeValues != null) {
-            // Fine-tuning requires both tokenIds and hCodeValues to be of the same length
-            Boolean isTrainable = hCodeTokenIds.size() == hCodeValues.size();
-            annotationEntity.setIsTrainable(isTrainable);
+            annotationRepository.save(annotationEntity);
         }
-        annotationRepository.save(annotationEntity);
     }
 }

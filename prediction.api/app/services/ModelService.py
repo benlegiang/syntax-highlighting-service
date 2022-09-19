@@ -1,3 +1,5 @@
+import time
+from typing import Container
 from app.services.MongoDatabase import MongoDatabase
 import pickle
 from app.utils.SHModelUtils import SHModel
@@ -5,10 +7,13 @@ import requests
 
 class ModelService:
 
-    def __init__(self, database: str, training_api: str):
+    def __init__(self, database: str, training_api: str, container_number: int):
+        if container_number > 1:
+            time.sleep(5)
         self.client = MongoDatabase().client
         self.database = database
         self.training_api = training_api
+        self.container_number = container_number
         # Loads for each language its model from the database stored as binary
         self.python_model: SHModel = self.load_model_from_db('PYTHON3', None)
         self.java_model: SHModel = self.load_model_from_db('JAVA', None)
@@ -72,7 +77,6 @@ class ModelService:
     # Returns a model
     def load_model_from_db(self, model_lang: str, model_number: int) -> SHModel:
         try: 
-
             if self.check_if_model_exists(model_lang):
                 if model_number == None:
                     latest = self.get_latest_model_number(model_lang)
@@ -81,7 +85,7 @@ class ModelService:
                     return self.get_model_data(model_number, model_lang)
             else:
                 # Make request to training.api for it to init training of very first model and save it to DB
-
+                
                 response = requests.post(self.training_api + f'/build?lang={model_lang}').json()
 
                 if response['success'] == True and response['modelNumber']:

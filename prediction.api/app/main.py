@@ -1,18 +1,30 @@
 from flask import Flask, jsonify, request
 from app.utils.SHModelUtils import *
 from app.services.ModelService import *
+import docker
+import os
 
 app = Flask(__name__)
+
+# Gets information about all running containers
+# Needed to know which number of the replica group this container has
+cli = docker.APIClient(base_url='unix://var/run/docker.sock')
+HOSTNAME = os.environ.get("HOSTNAME")
+all_containers = cli.containers()
+our_container = [c for c in all_containers if c['Id'][:12] == HOSTNAME[:12]][0]
+
+container_number = int(our_container['Labels']['com.docker.compose.container-number'])
 
 database = 'syntaxHighlighting'
 # training_api = 'http://localhost:8001/api/v1'
 training_api = 'http://syntax-highlighting-service-training-api:8001/api/v1'
 
-modelService = ModelService(database, training_api)
+modelService = ModelService(database, training_api, container_number)
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
     return jsonify({'message':'syntax highlighting prediction api'})
+    
 
 
 @app.route('/api/v1/predict', methods=['POST'])
@@ -37,7 +49,9 @@ def predict():
             return jsonify(prediction = prediction)
 
     else:
+        # return f'{container_number}'
         return 'Content-Type is not supported!'
+        
 
 @app.route('/api/v1/deploy', methods=['POST'])
 def deploy_latest_model():

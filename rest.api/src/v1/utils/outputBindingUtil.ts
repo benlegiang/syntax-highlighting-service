@@ -14,6 +14,7 @@ export class OutputBindingUtil {
 
     return {
       src: src,
+      prediction: prediction,
       result: bindings,
     };
   }

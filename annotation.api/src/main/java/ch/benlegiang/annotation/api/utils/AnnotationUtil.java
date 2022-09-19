@@ -32,7 +32,6 @@ public class AnnotationUtil {
 
     public static HTok[] highlightSourceCode(AnnotationEntity annotationEntity) {
         HTok[] hToks = parse(annotationEntity.getCodeLanguage(), annotationEntity.getSourceCode());
-        System.out.println(annotationEntity);
 
         if (hToks == null) {
             throw new NullPointerException("Highlighting the source code failed");

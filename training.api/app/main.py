@@ -1,26 +1,29 @@
 from flask import Flask, jsonify, request
-
 from app.utils.SHModelUtils import *
-from app.utils.services.ModelService import ModelService
 from apscheduler.schedulers.background import BackgroundScheduler
+import docker
+from app.utils.services.TrainingService import TrainingService
 
 app = Flask(__name__)
 
-prediction_api = 'http://syntax-highlighting-service-load-balancer:7777/api/v1'
+cli = docker.APIClient(base_url='unix://var/run/docker.sock')
+all_containers = cli.containers()
+prediction_containers = [c for c in all_containers if c['Labels']['com.docker.compose.service'] == 'prediction-api']
+
 database: str = 'syntaxHighlighting'
 annotations_collection: str = 'annotations'
-batch_size: int = 20000
-training_size: float = 0.8
-check_db_interval: int = 5 
-threshold = 100
+min_batch_size: int = 100
+max_batch_size: int = 1500
+check_db_interval: int = 5
+langs = ['PYTHON3', 'JAVA', 'KOTLIN']
 
-modelService = ModelService(prediction_api, database, annotations_collection, batch_size, training_size)
+trainingService = TrainingService(langs, prediction_containers, database, annotations_collection, min_batch_size, max_batch_size)
 
 # Scheduler for checking changes to DB
 
 scheduler = BackgroundScheduler()
 
-scheduler.add_job(modelService.check_db_changes, 'interval', minutes=check_db_interval, args=(database, annotations_collection, threshold))
+scheduler.add_job(trainingService.check_for_training, 'interval', minutes=check_db_interval)
 scheduler.start()
 
 @app.route("/", methods=['GET', 'POST'])
@@ -31,9 +34,10 @@ def index():
 # Endpoint is only called once to initiate empty models
 @app.route("/api/v1/build", methods=['POST'])
 def build_model():
+
     model_lang: str = request.args.get('lang').upper()
     try:
-        model_number = modelService.build_model(model_lang)
+        model_number = trainingService.init_model(model_lang)
         return jsonify({'success': True, 'modelLang': model_lang, 'modelNumber': model_number})
 
     except Exception as e: 
