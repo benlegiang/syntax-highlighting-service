@@ -11,7 +11,7 @@
 [Demo](http://benlegiang.ch)
 
 ### Public REST Endpoint
-http://benlegiang.ch:8080/api/v1/highlight
+http://benlegiang.ch:8081/api/v1/highlight
 ```json
  {
     "codeLanguage": "PYTHON3",
