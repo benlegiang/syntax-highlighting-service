@@ -46,7 +46,7 @@ Docker and Docker Compose
    ```
 4. Start all services
    ```sh
-   docker compose up -d
+   sh run.sh
    ```
 ## License [![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
