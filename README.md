@@ -7,10 +7,10 @@
 
 <p align="justify">With the presence of online collaborative tools such as GitHub, StackOverflow and Slack for software development, code is shared and consulted in an array of shapes and contexts be it code review, viewers and snippets. In the context of syntax highlighting, systems of regular expressions and lexing program files are state of practice and are utilized for approximating lexical as well as grammatical structures. Although systems of regular expressions require more work to develop and to maintain, it is preferred due to its fast and lightweight solution that can be applied to any language derivation. This thesis, however, implements a web service that aims to incorporate a statistical solution and improves with the number of incoming requests based on deep-learning to the domain of syntax highlighting. Furthermore, we train our models for the programming languages Python 3, Java and Kotlin by lexing and parsing the source codes of public repositories on GitHub. This thesis shows that with a constant prediction latency, the accuracy of the web service increases for both code files and code snippets as more source codes are supplied. The oracle data sets used for validating the service can also be found in this repository.</p>
 
-### Deployed Instance
+### Deployed Instance (As of Sept. 2022)
 [Demo](http://benlegiang.ch)
 
-### Public REST Endpoint
+### Public REST Endpoint (As of Sept. 2022)
 POST http://benlegiang.ch:8081/api/v1/highlight
 ```json
  {
@@ -43,7 +43,8 @@ You can run the project locally by following the steps.
 
 ### Prerequisites
 
-Docker and Docker Compose
+* Docker
+* Docker Compose
 
 ### Installation
 
