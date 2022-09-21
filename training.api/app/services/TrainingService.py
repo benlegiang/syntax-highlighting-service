@@ -47,8 +47,7 @@ class TrainingService:
     # Checks and attempts a fine-tuning on latest model
     # Lock function from executing, in case training takes longer than the check interval
     def check_for_training(self):
-        lock.acquire()
-        try:
+        with lock:
             for lang in self.langs:
                 training_a_unfiltered = self.load_training_annotations(lang)
 
@@ -100,8 +99,6 @@ class TrainingService:
                     self.update_training_db_set(training_data)
                     self.update_validation_db_set(validation_data)
                     self.deploy_latest_model(lang, new_model_number)
-        finally:
-            lock.release()
 
 
     # Update training set on DB
