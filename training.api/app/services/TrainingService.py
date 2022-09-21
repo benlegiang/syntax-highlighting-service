@@ -5,6 +5,8 @@ from statistics import mean
 import requests
 from app.utils.SHModelUtils import JAVA_LANG_NAME, KOTLIN_LANG_NAME, PYTHON3_LANG_NAME, SHModel
 from app.services.MongoDatabase import MongoDatabase
+from threading import Lock
+lock = Lock()
 
 
 class TrainingService:
@@ -43,59 +45,63 @@ class TrainingService:
             return model_number
 
     # Checks and attempts a fine-tuning on latest model
+    # Lock function from executing, in case training takes longer than the check interval
     def check_for_training(self):
+        lock.acquire()
+        try:
+            for lang in self.langs:
+                training_a_unfiltered = self.load_training_annotations(lang)
 
-        for lang in self.langs:
-            training_a_unfiltered = self.load_training_annotations(lang)
+                if len(training_a_unfiltered) == 0:
+                    continue
 
-            if len(training_a_unfiltered) == 0:
-                continue
+                # Removes duplicates
+                training_a_non_duplicates = self.remove_duplicates(training_a_unfiltered)
 
-            # Removes duplicates
-            training_a_non_duplicates = self.remove_duplicates(training_a_unfiltered)
-
-            # Not enough training data, skip!
-            if len(training_a_non_duplicates) < self.min_batch_size:
-                continue
+                # Not enough training data, skip!
+                if len(training_a_non_duplicates) < self.min_batch_size:
+                    continue
 
 
-            # Loads latest model because only model with highest accuracy will be saved to DB anyways
-            model_json = self.load_latest_model_from_db(lang)
-            
-            if model_json == None:
-                continue
+                # Loads latest model because only model with highest accuracy will be saved to DB anyways
+                model_json = self.load_latest_model_from_db(lang)
+                
+                if model_json == None:
+                    continue
 
-            latest_model = self.get_model_data_pickled(model_json)
-            latest_model_accuracy = model_json['accuracy']
-            latest_model_training_size = int(model_json['trainingSize'])
+                latest_model = self.get_model_data_pickled(model_json)
+                latest_model_accuracy = model_json['accuracy']
+                latest_model_training_size = int(model_json['trainingSize'])
 
-            # No latest model existing, skip!
-            if latest_model == None:
-                continue
+                # No latest model existing, skip!
+                if latest_model == None:
+                    continue
 
-            training_data = training_a_non_duplicates[:int((len(training_a_non_duplicates)+1)*self.training_size)]
-            validation_data = training_a_non_duplicates[int((len(training_a_non_duplicates)+1)*self.training_size):]
+                training_data = training_a_non_duplicates[:int((len(training_a_non_duplicates)+1)*self.training_size)]
+                validation_data = training_a_non_duplicates[int((len(training_a_non_duplicates)+1)*self.training_size):]
 
-            # input_training = [training_data['hCodeTokenIds'] for training_data['hCodeTokenIds'] in training_data]
-            # target_training = [training_data['hCodeValues'] for training_data['hCodeValues'] in training_data]
-            input_training = [training['hCodeTokenIds'] for training in training_data]
-            target_training = [training['hCodeValues'] for training in training_data]
-            
-            input_validation = [validation['hCodeTokenIds'] for validation in validation_data]
-            target_validation = [validation['hCodeValues'] for validation in validation_data]
+                # input_training = [training_data['hCodeTokenIds'] for training_data['hCodeTokenIds'] in training_data]
+                # target_training = [training_data['hCodeValues'] for training_data['hCodeValues'] in training_data]
+                input_training = [training['hCodeTokenIds'] for training in training_data]
+                target_training = [training['hCodeValues'] for training in training_data]
+                
+                input_validation = [validation['hCodeTokenIds'] for validation in validation_data]
+                target_validation = [validation['hCodeValues'] for validation in validation_data]
 
-            trained_model = self.train_model(latest_model, input_training, target_training)
-            trained_accuracy, total_validation_size = self.get_model_accuracy(trained_model, lang, input_validation, target_validation)
+                trained_model = self.train_model(latest_model, input_training, target_training)
+                trained_accuracy, total_validation_size = self.get_model_accuracy(trained_model, lang, input_validation, target_validation)
 
-            total_training_size = latest_model_training_size + len(training_data)
-            
-            # If accuracy got better, save model to DB and make all prediction.api instances pull new model
-            if trained_accuracy > latest_model_accuracy:
-                new_model_number = self.get_latest_model_number(lang) + 1
-                self.save_model_to_db(trained_model, new_model_number, lang, total_training_size, total_validation_size, trained_accuracy)
-                self.update_training_db_set(training_data)
-                self.update_validation_db_set(validation_data)
-                self.deploy_latest_model(lang, new_model_number)
+                total_training_size = latest_model_training_size + len(training_data)
+                
+                # If accuracy got better, save model to DB and make all prediction.api instances pull new model
+                if trained_accuracy > latest_model_accuracy:
+                    new_model_number = self.get_latest_model_number(lang) + 1
+                    self.save_model_to_db(trained_model, new_model_number, lang, total_training_size, total_validation_size, trained_accuracy)
+                    self.update_training_db_set(training_data)
+                    self.update_validation_db_set(validation_data)
+                    self.deploy_latest_model(lang, new_model_number)
+        finally:
+            lock.release()
 
 
     # Update training set on DB
