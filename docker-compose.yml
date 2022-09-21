@@ -42,7 +42,7 @@ services:
     expose:
       - "${ANNOTATION_API_HOST_PORT}"
     deploy:
-      replicas: 4
+      replicas: 3
       resources:
         limits:
           memory: 2G
