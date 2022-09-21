@@ -5,7 +5,7 @@ import sys
 import csv
 
 annotation_api_url = 'http://localhost:8081/api/v1/highlight'
-max_iterations = 3
+max_iterations = 4
 
 
 def divide_chunks(l, n):
@@ -15,7 +15,7 @@ def divide_chunks(l, n):
 def validate(code_lang):
 
     iteration = 1
-    batch_size = 1500
+    batch_size = 1000
     header = ['id', 'delay', 'correctPrediction']
 
 
