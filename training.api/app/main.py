@@ -12,9 +12,9 @@ prediction_containers = [c for c in all_containers if c['Labels']['com.docker.co
 
 database: str = 'syntaxHighlighting'
 annotations_collection: str = 'annotations'
-min_batch_size: int = 100
-max_batch_size: int = 1500
-check_db_interval: int = 5
+min_batch_size: int = 1500
+max_batch_size: int = 10000
+check_db_interval: int = 3
 langs = ['PYTHON3', 'JAVA', 'KOTLIN']
 
 trainingService = TrainingService(langs, prediction_containers, database, annotations_collection, min_batch_size, max_batch_size)
