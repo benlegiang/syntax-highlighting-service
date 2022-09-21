@@ -1,11 +1,8 @@
-from concurrent.futures import ThreadPoolExecutor
 from statistics import mean, median
 import requests
 import json
 import sys
 import csv
-import ast
-
 
 annotation_api_url = 'http://localhost:8081/api/v1/highlight'
 max_iterations = 3
@@ -50,10 +47,10 @@ def validate(code_lang):
                 response_data = res.json()
 
                 if response_data and response_data['prediction']:
-                    print("YES")
-                    correct = response_data['prediction'] == el['hCodeValues']
-                    print("prediction: ", len(response_data['prediction']))
-                    print("hcode: ", len(el['hCodeValues']))
+                    #  Remove last item from hCodeValues since it is End-of-line token
+
+                    formal = list(el['hCodeValues'])[:-1]
+                    correct = set(response_data['prediction']) == set(formal)
                     row = [el['_id']['$oid'], round(res.elapsed.total_seconds() * 1000, 2), correct]
                     writer.writerow(row)
                 else:
