@@ -15,7 +15,7 @@ def divide_chunks(l, n):
 def validate(code_lang):
 
     iteration = 1
-    batch_size = 1000
+    batch_size = 1200
     header = ['id', 'delay', 'correctPrediction']
 
 
