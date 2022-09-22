@@ -33,7 +33,6 @@ services:
     networks:
       - backend   
     restart: always
-
   annotation-api:
     build: ./annotation.api
     image: benlegiang/syntax-highlighting-service-annotation-api:master
@@ -52,7 +51,6 @@ services:
     networks:
       - backend
     restart: always
-
   prediction-api:
     build: ./prediction.api
     image: benlegiang/syntax-highlighting-service-prediction-api:master
@@ -77,8 +75,6 @@ services:
     container_name: syntax-highlighting-service-training-api
     build: ./training.api
     image: benlegiang/syntax-highlighting-service-training-api:master
-    ports:
-      - $TRAINING_API_HOST_PORT:$TRAINING_API_HOST_PORT
     expose:
       - "${TRAINING_API_HOST_PORT}"
     deploy:
@@ -102,8 +98,6 @@ services:
     volumes:
       - db-data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    ports:
-      - "$MONGO_HOST_PORT:$MONGO_HOST_PORT"
     deploy:
       resources:
         limits:
@@ -124,8 +118,6 @@ services:
     depends_on:
       - annotation-api
       - prediction-api
-    ports:
-      - ${NGINX_HOST_PORT}:${NGINX_HOST_PORT}
     expose:
       - "${NGINX_HOST_PORT}"
     deploy:
