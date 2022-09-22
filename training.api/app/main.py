@@ -12,7 +12,7 @@ prediction_containers = [c for c in all_containers if c['Labels']['com.docker.co
 
 database: str = 'syntaxHighlighting'
 annotations_collection: str = 'annotations'
-min_batch_size: int = 750
+min_batch_size: int = 1000
 max_batch_size: int = 10000
 check_db_interval: int = 3
 langs = ['PYTHON3', 'JAVA', 'KOTLIN']
