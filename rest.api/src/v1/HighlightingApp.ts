@@ -12,11 +12,8 @@ export class HighlightingApp {
       const prediction = await highlightingService.highlight(requestBody.codeLanguage, requestBody.sourceCode);
       const result = OutputBindingUtil.getBindings(prediction);
 
-      span.finish();
       return result;
     }
-
-    span.finish();
 
     return {
       error: "Invalid input",
