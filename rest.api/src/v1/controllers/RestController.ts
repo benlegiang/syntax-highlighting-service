@@ -1,6 +1,5 @@
 import express from "express";
 import { HighlightingApp } from "../HighlightingApp";
-import * as Sentry from "@sentry/node";
 
 export class RestController {
   private router: any;
@@ -20,7 +19,7 @@ export class RestController {
 
       res.header(
         "Access-Control-Allow-Headers",
-        "Access-Control-Allow-Headers, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept, Sentry-Trace"
+        "Access-Control-Allow-Headers, Origin, Content-Type, Authorization, Content-Length, X-Requested-With, Accept"
       );
       if (req.method === "OPTIONS") {
         res.sendStatus(200);
@@ -31,18 +30,12 @@ export class RestController {
 
     // Entry endpoint for micro services
     this.router.post("/highlight", (req, res) => {
-      const scope = Sentry.getCurrentHub().getScope();
-      scope.setTransactionName("rest.api-highlight");
-      scope.setTag("source", "rest.api");
-
       new HighlightingApp()
         .process(req)
         .then((result) => {
-          scope.getTransaction().finish();
           res.json(result);
         })
         .catch((e) => {
-          Sentry.captureException(e);
           res.json(null);
         });
     });

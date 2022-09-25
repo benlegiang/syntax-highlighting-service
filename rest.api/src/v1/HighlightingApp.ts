@@ -1,16 +1,9 @@
 import { OutputBindingUtil } from "./utils/outputBindingUtil";
 import { HighlightingService } from "./services/HighlightingService";
 import { RequestCheckUtil } from "./utils/requestCheckUtil";
-import * as Sentry from "@sentry/node";
 
 export class HighlightingApp {
   public async process(req: any): Promise<any> {
-    const scope = Sentry.getCurrentHub().getScope();
-    const span = scope.getTransaction().startChild({
-      op: "execute",
-      description: this.constructor.name,
-    });
-
     const requestBody = req?.body || null;
 
     if (RequestCheckUtil.check(requestBody)) {

@@ -29,7 +29,6 @@ export class HighlightingService {
 
       return Promise.resolve(responseBody);
     } catch (err) {
-      console.log(err.code);
       return Promise.resolve(null);
     }
   }
