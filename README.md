@@ -34,7 +34,7 @@ POST http://benlegiang.ch:8081/api/v1/highlight
 * Express
 * Gunicorn
 * Flask
-* Gradle
+* Gradle with Spring Boot
 
 
 ## Getting Started
