@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 
-# mongo_uri = 'mongodb://admin:admin@localhost:27017'
 mongo_uri = 'mongodb://admin:admin@mongodb:27017'
 
 class MongoDatabase:
