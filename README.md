@@ -8,10 +8,10 @@
 <p align="justify">Syntax Highlighting (SH) plays a substantial role in the daily lives of software developers and can be truly found everywhere where code is developed and shared. It enhances productivity by assigning different colors to text to not only serve the user information about the features and grammatical structure of a language but to also increase the readability of code. With the goal to provide a smart and user-friendly SH solution to the public for the mainstream programming languages Java, Kotlin and Python, we implement a web service that is quick to set up, easily accessible and requires no manual maintenance since it autonomously and continuously improves with the number of submitted requests by incorporating a fine-tuning logic for deep learning models. We show that our SH solution produces instantaneous response times and is able to continuously achieve decent to highly accurate SH results by learning from user requests.</p>
 
 ### Deployed Instance (As of Sept. 2022)
-[Demo](http://benlegiang.ch)
+[Demo](http://api.benlegiang.ch)
 
 ### Public REST Endpoint (As of Sept. 2022)
-POST http://benlegiang.ch:8081/api/v1/highlight
+POST http://api.benlegiang.ch:8081/api/v1/highlight
 ```json
  {
     "codeLanguage": "PYTHON3",
