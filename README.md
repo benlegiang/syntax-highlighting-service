@@ -67,5 +67,5 @@ Distributed under the MIT License.
 
 ## Contact
 
-Hoàng Ben Lê Giang - hoangben.legiang@uzh.ch
+Hoàng Ben Lê Giang - contact@benlegiang.ch
 
